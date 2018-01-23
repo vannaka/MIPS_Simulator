@@ -5,6 +5,7 @@
 #include <assert.h>
 
 #include "mu-mips.h"
+#include "Instructions.h"
 
 /***************************************************************/
 /* Print out a list of commands available                      */
@@ -326,7 +327,7 @@ void load_program()
 	uint32_t address;
 
 	/* Open program file. */
-	fp = fopen( rog_file, "r" );
+	fp = fopen( prog_file, "r" );
 	if( fp == NULL )
 	{
 		printf( "Error: Can't open program file %s\n", prog_file );
@@ -389,8 +390,36 @@ void print_program()
 /************************************************************/
 void print_instruction(uint32_t addr)
 {
-	/*IMPLEMENT THIS*/
-}
+	uint32_t instr;
+	uint8_t opcode;
+	uint8_t funct_code;
+	uint8_t rt;
+	mips_instr_t instr_info;
+	
+	instr = mem_read_32( addr );
+	opcode = GET_OPCODE(instr);
+	funct_code = -1;
+	rt = -1;
+
+	if (opcode == 0)
+	{
+		funct_code = GET_FUNCTCODE(instr);
+		instr_info = mips_instr_lookup[opcode].subtable[funct_code];
+	}
+	else if (opcode == 1)
+	{
+		rt = GET_RT(instr);
+		instr_info = mips_instr_lookup[opcode].subtable[rt];
+	}
+	else
+	{
+		instr_info = mips_instr_lookup[opcode];
+
+	}
+
+	printf("%s\n", instr_info.name);
+
+}	/* print_instruction() */
 
 /***************************************************************/
 /* main                                                        */
@@ -416,4 +445,5 @@ int main( int argc, char *argv[] )
 		handle_command();
 	}
 	return 0;
+
 }

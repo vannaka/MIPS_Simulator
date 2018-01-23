@@ -64,8 +64,8 @@ mips_instr_t opcode_0x00_table[0x2A + 1] =
 mips_instr_t opcode_0x01_table[2] = 
 {
 		//  Name	type	OCode	FCode	RD?		RS?		RT?		Offset?	Addr?	FPtr	SubTable
-	[0] = { "BLTZ",	I_TYPE,	0x01,	0xFF,	false,	true,	false,	true,	false,	NULL,	NULL },
-	[1] = { "BGEZ",	I_TYPE, 0x01,	0xFF,	false,	true,	false,	true,	false,	NULL,	NULL }
+	[0] = { "BLTZ",	I_TYPE,	0x01,	0x00,	false,	true,	false,	true,	false,	NULL,	NULL },
+	[1] = { "BGEZ",	I_TYPE, 0x01,	0x00,	false,	true,	false,	true,	false,	NULL,	NULL }
 };
 
 
@@ -74,23 +74,23 @@ mips_instr_t mips_instr_lookup[0x2B + 1] =
 			//  Name		type	OCode	FCode	RD?		RS?		RT?		Offset?	Addr?	FPtr	SubTable
 	[0x00] = { "XXXX",		M_TYPE,	0x00,	0x00,	false,	false,	false,	false,	false,	NULL,	opcode_0x00_table },
 	[0x01] = { "XXXX",		M_TYPE,	0x01,	0x00,	false,	false,	false,	false,	false,	NULL,	opcode_0x01_table },
-	[0x02] = { "J",			J_TYPE,	0x02,	0xFF,	false,	false,	false,	false,	true,	NULL,	NULL },
-	[0x03] = { "JAL",		J_TYPE,	0x03,	0xFF,	false,	false,	false,	false,	true,	NULL,	NULL },
-	[0x04] = { "BEQ",		I_TYPE,	0x04,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x05] = { "BNE",		I_TYPE,	0x05,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x06] = { "BLEZ",		I_TYPE,	0x06,	0xFF,	false,	true,	false,	true,	false,	NULL,	NULL },
-	[0x07] = { "BGTZ",		I_TYPE,	0x07,	0xFF,	false,	true,	false,	true,	false,	NULL,	NULL },
-	[0x08] = { "ADDI",		I_TYPE,	0x08,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x09] = { "ADDIU",		I_TYPE,	0x09,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x0A] = { "SLTI",		I_TYPE,	0x0A,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x0C] = { "ANDI",		I_TYPE,	0x0C,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x0D] = { "ORI",		I_TYPE,	0x0D,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x0E] = { "XORI",		I_TYPE,	0x0E,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x0F] = { "LUI",		I_TYPE,	0x0F,	0xFF,	false,	false,	true,	true,	false,	NULL,	NULL },
-	[0x20] = { "LB",		I_TYPE,	0x20,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x21] = { "LH",		I_TYPE,	0x21,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x23] = { "LW",		I_TYPE,	0x23,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x28] = { "SB",		I_TYPE,	0x28,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x29] = { "SH",		I_TYPE,	0x29,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL },
-	[0x2B] = { "SW",		I_TYPE,	0x2B,	0xFF,	false,	true,	true,	true,	false,	NULL,	NULL }
+	[0x02] = { "J",			J_TYPE,	0x02,	0x00,	false,	false,	false,	false,	true,	NULL,	NULL },
+	[0x03] = { "JAL",		J_TYPE,	0x03,	0x00,	false,	false,	false,	false,	true,	NULL,	NULL },
+	[0x04] = { "BEQ",		I_TYPE,	0x04,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x05] = { "BNE",		I_TYPE,	0x05,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x06] = { "BLEZ",		I_TYPE,	0x06,	0x00,	false,	true,	false,	true,	false,	NULL,	NULL },
+	[0x07] = { "BGTZ",		I_TYPE,	0x07,	0x00,	false,	true,	false,	true,	false,	NULL,	NULL },
+	[0x08] = { "ADDI",		I_TYPE,	0x08,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x09] = { "ADDIU",		I_TYPE,	0x09,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x0A] = { "SLTI",		I_TYPE,	0x0A,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x0C] = { "ANDI",		I_TYPE,	0x0C,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x0D] = { "ORI",		I_TYPE,	0x0D,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x0E] = { "XORI",		I_TYPE,	0x0E,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x0F] = { "LUI",		I_TYPE,	0x0F,	0x00,	false,	false,	true,	true,	false,	NULL,	NULL },
+	[0x20] = { "LB",		I_TYPE,	0x20,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x21] = { "LH",		I_TYPE,	0x21,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x23] = { "LW",		I_TYPE,	0x23,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x28] = { "SB",		I_TYPE,	0x28,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x29] = { "SH",		I_TYPE,	0x29,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL },
+	[0x2B] = { "SW",		I_TYPE,	0x2B,	0x00,	false,	true,	true,	true,	false,	NULL,	NULL }
 };
