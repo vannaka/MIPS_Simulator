@@ -4,31 +4,33 @@
 #define TRUE  1
 
 /******************************************************************************/
-/* MIPS memory layout                                                                                                                                      */
+/* MIPS memory layout                                                         */
 /******************************************************************************/
 #define MEM_TEXT_BEGIN  0x00400000
-#define MEM_TEXT_END      0x0FFFFFFF
+#define MEM_TEXT_END    0x0FFFFFFF
 /*Memory address 0x10000000 to 0x1000FFFF access by $gp*/
-#define MEM_DATA_BEGIN  0x10010000
-#define MEM_DATA_END   0x7FFFFFFF
+#define MEM_DATA_BEGIN	0x10010000
+#define MEM_DATA_END	0x7FFFFFFF
 
 #define MEM_KTEXT_BEGIN 0x80000000
-#define MEM_KTEXT_END  0x8FFFFFFF
+#define MEM_KTEXT_END	0x8FFFFFFF
 
 #define MEM_KDATA_BEGIN 0x90000000
-#define MEM_KDATA_END  0xFFFEFFFF
+#define MEM_KDATA_END	0xFFFEFFFF
 
 /*stack and data segments occupy the same memory space. Stack grows backward (from higher address to lower address) */
 #define MEM_STACK_BEGIN 0x7FFFFFFF
-#define MEM_STACK_END  0x10010000
+#define MEM_STACK_END	0x10010000
 
-typedef struct {
+typedef struct 
+{
 	uint32_t begin, end;
 	uint8_t *mem;
 } mem_region_t;
 
 /* memory will be dynamically allocated at initialization */
-mem_region_t MEM_REGIONS[] = {
+mem_region_t MEM_REGIONS[] = 
+{
 	{ MEM_TEXT_BEGIN, MEM_TEXT_END, NULL },
 	{ MEM_DATA_BEGIN, MEM_DATA_END, NULL },
 	{ MEM_KDATA_BEGIN, MEM_KDATA_END, NULL },
@@ -38,7 +40,8 @@ mem_region_t MEM_REGIONS[] = {
 #define NUM_MEM_REGION 4
 #define MIPS_REGS 32
 
-typedef struct CPU_State_Struct {
+typedef struct CPU_State_Struct 
+{
   uint32_t PC;		            /* program counter */
   uint32_t REGS[MIPS_REGS]; 	/* register file. */
   uint32_t HI, LO;              /* special regs for mult/div. */
@@ -47,7 +50,7 @@ typedef struct CPU_State_Struct {
 
 
 /***************************************************************/
-/* CPU State info.                                                                                                               */
+/* CPU State info.                                             */
 /***************************************************************/
 
 CPU_State CURRENT_STATE, NEXT_STATE;
@@ -59,7 +62,7 @@ char prog_file[32];
 
 
 /***************************************************************/
-/* Function Declerations.                                                                                                */
+/* Function Declerations.                                      */
 /***************************************************************/
 void help();
 uint32_t mem_read_32(uint32_t address);
