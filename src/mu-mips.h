@@ -1,3 +1,6 @@
+#ifndef MU_MIPS_H
+#define MU_MIPS_H
+
 #include <stdint.h>
 
 #define FALSE 0
@@ -81,3 +84,4 @@ void initialize();
 void print_program(); /*IMPLEMENT THIS*/
 void print_instruction(uint32_t);
 
+#endif // !MU_MIPS_H
