@@ -353,8 +353,35 @@ void load_program()
 /************************************************************/
 void handle_instruction()
 {
-	/*IMPLEMENT THIS*/
-	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
+	uint32_t instr;
+	uint8_t opcode;
+	uint8_t funct_code;
+	uint8_t rt;
+	mips_instr_t instr_info;
+
+
+	instr = mem_read_32( CURRENT_STATE.PC );
+	opcode = GET_OPCODE( instr );
+	funct_code = -1;
+	rt = -1;
+
+	if( opcode == 0 )
+	{
+		funct_code = GET_FUNCTCODE( instr );
+		instr_info = mips_instr_lookup[opcode].subtable[funct_code];
+	}
+	else if( opcode == 1 )
+	{
+		rt = GET_RT( instr );
+		instr_info = mips_instr_lookup[opcode].subtable[rt];
+	}
+	else
+	{
+		instr_info = mips_instr_lookup[opcode];
+	}
+
+	// Call instruction handler
+	( *( instr_info.funct ) )();
 }
 
 
@@ -388,27 +415,32 @@ void print_program()
 /************************************************************/
 /* Print the instruction at given memory address (in MIPS assembly format)    */
 /************************************************************/
-void print_instruction(uint32_t addr)
+void print_instruction( uint32_t addr )
 {
 	uint32_t instr;
 	uint8_t opcode;
 	uint8_t funct_code;
+	uint8_t rd;
+	uint8_t rs;
 	uint8_t rt;
+	uint16_t offset;
 	mips_instr_t instr_info;
 	
+	
 	instr = mem_read_32( addr );
-	opcode = GET_OPCODE(instr);
+	opcode = GET_OPCODE( instr );
 	funct_code = -1;
 	rt = -1;
+	offset = -1;
 
-	if (opcode == 0)
+	if( opcode == 0 )
 	{
-		funct_code = GET_FUNCTCODE(instr);
+		funct_code = GET_FUNCTCODE( instr );
 		instr_info = mips_instr_lookup[opcode].subtable[funct_code];
 	}
-	else if (opcode == 1)
+	else if( opcode == 1 )
 	{
-		rt = GET_RT(instr);
+		rt = GET_RT( instr );
 		instr_info = mips_instr_lookup[opcode].subtable[rt];
 	}
 	else
@@ -417,7 +449,37 @@ void print_instruction(uint32_t addr)
 
 	}
 
-	printf("%s\n", instr_info.name);
+	// Display hex instruction
+	printf( "0x%08x\t", instr );
+
+	// Display instruction mnumonic
+	printf( "%s", instr_info.name );
+
+	if( instr_info.rd )
+	{
+		rd = GET_RD( instr );
+		printf( " $%s", mips_reg_names[rd] );
+	}
+
+	if( instr_info.rs )
+	{
+		rs = GET_RS( instr );
+		printf( " $%s", mips_reg_names[rs] );
+	}
+
+	if( instr_info.rt )
+	{
+		rt = GET_RT( instr );
+		printf( " $%s", mips_reg_names[rt] );
+	}
+
+	if( instr_info.offset )
+	{
+		offset = GET_OFFSET( instr );
+		printf( " 0x%04x", offset );
+	}
+
+	printf( "\n" );
 
 }	/* print_instruction() */
 
