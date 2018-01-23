@@ -30,11 +30,11 @@ typedef struct
 
 /* memory will be dynamically allocated at initialization */
 mem_region_t MEM_REGIONS[] = 
-{
-	{ MEM_TEXT_BEGIN, MEM_TEXT_END, NULL },
-	{ MEM_DATA_BEGIN, MEM_DATA_END, NULL },
-	{ MEM_KDATA_BEGIN, MEM_KDATA_END, NULL },
-	{ MEM_KTEXT_BEGIN, MEM_KTEXT_END, NULL }
+{	// Start			End				Addr
+	{ MEM_TEXT_BEGIN,	MEM_TEXT_END,	NULL },
+	{ MEM_DATA_BEGIN,	MEM_DATA_END,	NULL },
+	{ MEM_KDATA_BEGIN,	MEM_KDATA_END,	NULL },
+	{ MEM_KTEXT_BEGIN,	MEM_KTEXT_END,	NULL }
 };
 
 #define NUM_MEM_REGION 4
