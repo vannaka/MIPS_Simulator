@@ -6,6 +6,8 @@
 
 #include "mu-mips.h"
 #include "Instructions.h"
+#include "memory.h"
+
 
 /***************************************************************/
 /* Print out a list of commands available                      */
@@ -28,48 +30,6 @@ void help()
 	printf("------------------------------------------------------------------\n\n");
 }
 
-/***************************************************************/
-/* Read a 32-bit word from memory                              */
-/***************************************************************/
-uint32_t mem_read_32( uint32_t address )
-{
-	int i;
-	for( i = 0; i < NUM_MEM_REGION; i++ ) 
-	{
-		if( ( address >= MEM_REGIONS[i].begin ) && 
-			( address <= MEM_REGIONS[i].end ) ) 
-		{
-			uint32_t offset = address - MEM_REGIONS[i].begin;
-			return ( MEM_REGIONS[i].mem[offset+3] << 24 ) |
-				   ( MEM_REGIONS[i].mem[offset+2] << 16 ) |
-				   ( MEM_REGIONS[i].mem[offset+1] <<  8 ) |
-				   ( MEM_REGIONS[i].mem[offset+0] <<  0 );
-		}
-	}
-	return 0;
-}
-
-/***************************************************************/
-/* Write a 32-bit word to memory                               */
-/***************************************************************/
-void mem_write_32( uint32_t address, uint32_t value )
-{
-	int i;
-	uint32_t offset;
-	for (i = 0; i < NUM_MEM_REGION; i++) 
-	{
-		if ( (address >= MEM_REGIONS[i].begin) && 
-			 (address <= MEM_REGIONS[i].end) ) 
-		{
-			offset = address - MEM_REGIONS[i].begin;
-
-			MEM_REGIONS[i].mem[offset+3] = (value >> 24) & 0xFF;
-			MEM_REGIONS[i].mem[offset+2] = (value >> 16) & 0xFF;
-			MEM_REGIONS[i].mem[offset+1] = (value >>  8) & 0xFF;
-			MEM_REGIONS[i].mem[offset+0] = (value >>  0) & 0xFF;
-		}
-	}
-}
 
 /***************************************************************/
 /* Execute one cycle                                           */
@@ -81,13 +41,14 @@ void cycle()
 	INSTRUCTION_COUNT++;
 }
 
+
 /***************************************************************/
 /* Simulate MIPS for n cycles                                  */
 /***************************************************************/
 void run( int num_cycles ) 
 {                                      
 	
-	if( RUN_FLAG == FALSE ) 
+	if( RUN_FLAG == false ) 
 	{
 		printf("Simulation Stopped\n\n");
 		return;
@@ -97,7 +58,7 @@ void run( int num_cycles )
 	int i;
 	for( i = 0; i < num_cycles; i++ ) 
 	{
-		if( RUN_FLAG == FALSE ) 
+		if( RUN_FLAG == false ) 
 		{
 			printf("Simulation Stopped.\n\n");
 			break;
@@ -106,12 +67,13 @@ void run( int num_cycles )
 	}
 }
 
+
 /***************************************************************/
 /* simulate to completion                                      */
 /***************************************************************/
 void runAll() 
 {                                                     
-	if( RUN_FLAG == FALSE ) 
+	if( RUN_FLAG == false ) 
 	{
 		printf( "Simulation Stopped.\n\n" );
 		return;
@@ -125,47 +87,6 @@ void runAll()
 	printf( "Simulation Finished.\n\n" );
 }
 
-/***************************************************************/ 
-/* Dump a word-aligned region of memory to the terminal        */
-/***************************************************************/
-void mdump( uint32_t start, uint32_t stop ) 
-{          
-	uint32_t address;
-
-	printf( "-------------------------------------------------------------\n" );
-	printf( "Memory content [0x%08x..0x%08x] :\n", start, stop );
-	printf( "-------------------------------------------------------------\n" );
-	printf( "\t[Address in Hex (Dec) ]\t[Value]\n" );
-	for( address = start; address <= stop; address += 4 )
-	{
-		printf( "\t0x%08x (%d) :\t0x%08x\n", address, address, mem_read_32(address) );
-	}
-	printf( "\n" );
-}
-
-/***************************************************************/
-/* Dump current values of registers to the teminal             */   
-/***************************************************************/
-void rdump() 
-{                               
-	int i; 
-	printf( "-------------------------------------\n" );
-	printf( "Dumping Register Content\n" );
-	printf( "-------------------------------------\n" );
-	printf( "# Instructions Executed\t: %u\n", INSTRUCTION_COUNT );
-	printf( "PC\t: 0x%08x\n", CURRENT_STATE.PC );
-	printf( "-------------------------------------\n" );
-	printf( "[Register]\t[Value]\n" );
-	printf( "-------------------------------------\n" );
-	for( i = 0; i < MIPS_REGS; i++ )
-	{
-		printf( "[R%d]\t: 0x%08x\n", i, CURRENT_STATE.REGS[i] );
-	}
-	printf( "-------------------------------------\n" );
-	printf( "[HI]\t: 0x%08x\n", CURRENT_STATE.HI );
-	printf( "[LO]\t: 0x%08x\n", CURRENT_STATE.LO );
-	printf( "-------------------------------------\n" );
-}
 
 /***************************************************************/
 /* Read a command from standard input.                         */  
@@ -273,6 +194,7 @@ void handle_command()
 	}
 }
 
+
 /***************************************************************/
 /* reset registers/memory and reload program                   */
 /***************************************************************/
@@ -300,22 +222,9 @@ void reset()
 	INSTRUCTION_COUNT = 0;
 	CURRENT_STATE.PC =  MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
-	RUN_FLAG = TRUE;
+	RUN_FLAG = true;
 }
 
-/***************************************************************/
-/* Allocate and set memory to zero                             */
-/***************************************************************/
-void init_memory() 
-{                                           
-	int i;
-	for( i = 0; i < NUM_MEM_REGION; i++ ) 
-	{
-		uint32_t region_size = MEM_REGIONS[i].end - MEM_REGIONS[i].begin + 1;
-		MEM_REGIONS[i].mem = malloc(region_size);
-		memset(MEM_REGIONS[i].mem, 0, region_size);
-	}
-}
 
 /**************************************************************/
 /* load program into memory                                   */
@@ -348,37 +257,20 @@ void load_program()
 	fclose( fp );
 }
 
+
 /************************************************************/
 /* decode and execute instruction                           */ 
 /************************************************************/
 void handle_instruction()
 {
 	uint32_t instr;
-	uint8_t opcode;
-	uint8_t funct_code;
-	uint8_t rt;
 	mips_instr_t instr_info;
 
-
+	// Get instruction
 	instr = mem_read_32( CURRENT_STATE.PC );
-	opcode = GET_OPCODE( instr );
-	funct_code = -1;
-	rt = -1;
 
-	if( opcode == 0 )
-	{
-		funct_code = GET_FUNCTCODE( instr );
-		instr_info = mips_instr_lookup[opcode].subtable[funct_code];
-	}
-	else if( opcode == 1 )
-	{
-		rt = GET_RT( instr );
-		instr_info = mips_instr_lookup[opcode].subtable[rt];
-	}
-	else
-	{
-		instr_info = mips_instr_lookup[opcode];
-	}
+	// Decode instruction
+	instr_info = mips_instr_decode( instr );
 
 	// Call instruction handler
 	( *( instr_info.funct ) )();
@@ -393,8 +285,9 @@ void initialize()
 	init_memory();
 	CURRENT_STATE.PC = MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
-	RUN_FLAG = TRUE;
+	RUN_FLAG = true;
 }
+
 
 /************************************************************/
 /* Print the program loaded into memory (in MIPS assembly format)    */ 
@@ -412,49 +305,33 @@ void print_program()
 	}
 }
 
+
 /************************************************************/
 /* Print the instruction at given memory address (in MIPS assembly format)    */
 /************************************************************/
 void print_instruction( uint32_t addr )
 {
 	uint32_t instr;
-	uint8_t opcode;
-	uint8_t funct_code;
 	uint8_t rd;
 	uint8_t rs;
 	uint8_t rt;
 	uint16_t offset;
 	mips_instr_t instr_info;
 	
-	
 	instr = mem_read_32( addr );
-	opcode = GET_OPCODE( instr );
-	funct_code = -1;
 	rt = -1;
 	offset = -1;
 
-	if( opcode == 0 )
-	{
-		funct_code = GET_FUNCTCODE( instr );
-		instr_info = mips_instr_lookup[opcode].subtable[funct_code];
-	}
-	else if( opcode == 1 )
-	{
-		rt = GET_RT( instr );
-		instr_info = mips_instr_lookup[opcode].subtable[rt];
-	}
-	else
-	{
-		instr_info = mips_instr_lookup[opcode];
-
-	}
+	// Decode instruction
+	instr_info = mips_instr_decode( instr );
 
 	// Display hex instruction
 	printf( "0x%08x\t", instr );
 
 	// Display instruction mnumonic
 	printf( "%s", instr_info.name );
-
+	
+	// Display opperands
 	if( instr_info.rd )
 	{
 		rd = GET_RD( instr );
@@ -482,6 +359,7 @@ void print_instruction( uint32_t addr )
 	printf( "\n" );
 
 }	/* print_instruction() */
+
 
 /***************************************************************/
 /* main                                                        */
