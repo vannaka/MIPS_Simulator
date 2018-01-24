@@ -12,10 +12,6 @@
 #define GET_OFFSET(x)		( x & 0xFFFF )
 #define GET_ADDRESS(x)		( x & 0x3FFFFFF )
 
-// instruction handler declerations
-extern void mips_instr_LUI();
-
-
 // project types
 typedef enum 
 {
@@ -41,9 +37,14 @@ typedef struct mips_instr
 	struct mips_instr *subtable;
 } mips_instr_t;
 
+// Declare lookup tables
 extern mips_instr_t opcode_0x00_table[];
 extern mips_instr_t opcode_0x01_table[];
 extern mips_instr_t mips_instr_lookup[];
 extern char mips_reg_names[][5];
+
+// Declare instruction handlers
+void mips_instr_LUI();
+mips_instr_t mips_instr_decode( uint32_t instr );
 
 #endif // ! INSTRUCTIONS_H

@@ -2,10 +2,11 @@
 #include <stdint.h>
 
 #include "Instructions.h"
+#include "mu-mips.h"
 
 mips_instr_t opcode_0x00_table[0x2A + 1] =
 {
-	// Name			type	OCode	FCode	RD?		RS?		RT?		Offset?	Addr?	FunctPointer
+			// Name			type	OCode	FCode	RD?		RS?		RT?		Offset?	Addr?	FPtr	SubTable
 	[0x00] = { "SLL",		R_TYPE, 0x00,	0x00,	true,	true,	true,	false,	false,	NULL,	NULL },
 	[0x02] = { "SRL",		R_TYPE, 0x00,	0x02,	true,	true,	true,	false,	false,	NULL,	NULL },
 	[0x03] = { "SRA",		R_TYPE, 0x00,	0x03,	true,	true,	true,	false,	false,	NULL,	NULL },
@@ -33,7 +34,7 @@ mips_instr_t opcode_0x00_table[0x2A + 1] =
 
 mips_instr_t opcode_0x01_table[2] =
 {
-	//  Name	type	OCode	FCode	RD?		RS?		RT?		Offset?	Addr?	FPtr	SubTable
+		//  Name	type	OCode	FCode	RD?		RS?		RT?		Offset?	Addr?	FPtr	SubTable
 	[0] = { "BLTZ",	I_TYPE,	0x01,	0x00,	false,	true,	false,	true,	false,	NULL,	NULL },
 	[1] = { "BGEZ",	I_TYPE, 0x01,	0x00,	false,	true,	false,	true,	false,	NULL,	NULL }
 };
@@ -41,7 +42,7 @@ mips_instr_t opcode_0x01_table[2] =
 
 mips_instr_t mips_instr_lookup[0x2B + 1] =
 {
-	//  Name		type	OCode	FCode	RD?		RS?		RT?		Offset?	Addr?	FPtr				SubTable
+			//  Name		type	OCode	FCode	RD?		RS?		RT?		Offset?	Addr?	FunctPtr			SubTable
 	[0x00] = { "XXXX",		M_TYPE,	0x00,	0x00,	false,	false,	false,	false,	false,	NULL,				opcode_0x00_table },
 	[0x01] = { "XXXX",		M_TYPE,	0x01,	0x00,	false,	false,	false,	false,	false,	NULL,				opcode_0x01_table },
 	[0x02] = { "J",			J_TYPE,	0x02,	0x00,	false,	false,	false,	false,	true,	NULL,				NULL },
@@ -101,9 +102,40 @@ char mips_reg_names[][5] =
 	[31] = "ra"
 };
 
+mips_instr_t mips_instr_decode( uint32_t instr )
+{
+	uint8_t opcode;
+	uint8_t funct_code;
+	uint8_t rt;
+	mips_instr_t instr_info;
+
+
+	opcode = GET_OPCODE( instr );
+	funct_code = -1;
+	rt = -1;
+
+	if( opcode == 0 )
+	{
+		funct_code = GET_FUNCTCODE( instr );
+		instr_info = mips_instr_lookup[opcode].subtable[funct_code];
+	}
+	else if( opcode == 1 )
+	{
+		rt = GET_RT( instr );
+		instr_info = mips_instr_lookup[opcode].subtable[rt];
+	}
+	else
+	{
+		instr_info = mips_instr_lookup[opcode];
+
+	}
+
+	return instr_info;
+}
+
 void mips_instr_LUI()
 {
-	printf( "\nLUI executed\n" );
+	printf( "LUI executed\n\n" );
 }
 
 // ADD INSTRUCTION HANDLERS HERE
