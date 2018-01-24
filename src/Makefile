@@ -2,7 +2,7 @@ CC_GCC = gcc
 
 CFLAGS = -Wall -g -O2 
 
-OBJS = Instructions.o mu-mips.o
+OBJS = memory.o Instructions.o mu-mips.o
  
 OBJ_LINK_LIST:= $(OBJS)
 
