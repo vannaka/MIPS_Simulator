@@ -44,7 +44,7 @@ extern mips_instr_t mips_instr_lookup[];
 extern char mips_reg_names[][5];
 
 // Declare instruction handlers
-void mips_instr_LUI();
+void instr_handler_LUI();
 mips_instr_t mips_instr_decode( uint32_t instr );
 
 #endif // ! INSTRUCTIONS_H

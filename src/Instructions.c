@@ -57,7 +57,7 @@ mips_instr_t mips_instr_lookup[0x2B + 1] =
 	[0x0C] = { "ANDI",		I_TYPE,	0x0C,	0x00,	false,	true,	true,	true,	false,	NULL,				NULL },
 	[0x0D] = { "ORI",		I_TYPE,	0x0D,	0x00,	false,	true,	true,	true,	false,	NULL,				NULL },
 	[0x0E] = { "XORI",		I_TYPE,	0x0E,	0x00,	false,	true,	true,	true,	false,	NULL,				NULL },
-	[0x0F] = { "LUI",		I_TYPE,	0x0F,	0x00,	false,	false,	true,	true,	false,	&mips_instr_LUI,	NULL },
+	[0x0F] = { "LUI",		I_TYPE,	0x0F,	0x00,	false,	false,	true,	true,	false,	&instr_handler_LUI,	NULL },
 	[0x20] = { "LB",		I_TYPE,	0x20,	0x00,	false,	true,	true,	true,	false,	NULL,				NULL },
 	[0x21] = { "LH",		I_TYPE,	0x21,	0x00,	false,	true,	true,	true,	false,	NULL,				NULL },
 	[0x23] = { "LW",		I_TYPE,	0x23,	0x00,	false,	true,	true,	true,	false,	NULL,				NULL },
@@ -133,7 +133,7 @@ mips_instr_t mips_instr_decode( uint32_t instr )
 	return instr_info;
 }
 
-void mips_instr_LUI()
+void instr_handler_LUI()
 {
 	printf( "LUI executed\n\n" );
 }
