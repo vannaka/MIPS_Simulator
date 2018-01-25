@@ -9,30 +9,37 @@
 #define GET_RT(x)			( ( x >> 16 ) & 0x1F )
 #define GET_RD(x)			( ( x >> 11 ) & 0x1F )
 #define GET_FUNCTCODE(x)	( x & 0x0000003F )
-#define GET_OFFSET(x)		( x & 0xFFFF )
+#define GET_IMMED(x)		( x & 0xFFFF )
 #define GET_ADDRESS(x)		( x & 0x3FFFFFF )
 
 // project types
 typedef enum 
 {
-	INVAL = 0,
+	INV_TYPE = 0,
 	R_TYPE, 
 	I_TYPE, 
 	J_TYPE,
 	M_TYPE
-} mips_inst_type_t;
+} inst_type_t;
+
+typedef enum
+{
+	INV = 0,
+	RS,
+	RT,
+	RD,
+	SA,
+	IMMED,
+	ADDRESS
+} inst_op_type_t;
 
 typedef struct mips_instr
 {
 	char name[10];
-	mips_inst_type_t type;
+	inst_type_t type;
 	uint8_t opcode;
 	uint8_t funct_code;
-	bool rd;
-	bool rs;
-	bool rt;
-	bool offset;
-	bool addr;
+	inst_op_type_t skeleton[3];
 	void(*funct)();
 	struct mips_instr *subtable;
 } mips_instr_t;

@@ -315,12 +315,11 @@ void print_instruction( uint32_t addr )
 	uint8_t rd;
 	uint8_t rs;
 	uint8_t rt;
-	uint16_t offset;
+	uint16_t immed;
+	uint32_t address;
 	mips_instr_t instr_info;
 	
 	instr = mem_read_32( addr );
-	rt = -1;
-	offset = -1;
 
 	// Decode instruction
 	instr_info = mips_instr_decode( instr );
@@ -332,28 +331,35 @@ void print_instruction( uint32_t addr )
 	printf( "%s", instr_info.name );
 	
 	// Display opperands
-	if( instr_info.rd )
+	for( int i = 0; i < 3; i++ )
 	{
-		rd = GET_RD( instr );
-		printf( " $%s", mips_reg_names[rd] );
-	}
+		inst_op_type_t op_type = instr_info.skeleton[i];
 
-	if( instr_info.rs )
-	{
-		rs = GET_RS( instr );
-		printf( " $%s", mips_reg_names[rs] );
-	}
-
-	if( instr_info.rt )
-	{
-		rt = GET_RT( instr );
-		printf( " $%s", mips_reg_names[rt] );
-	}
-
-	if( instr_info.offset )
-	{
-		offset = GET_OFFSET( instr );
-		printf( " 0x%04x", offset );
+		if( op_type == RS )
+		{
+			rs = GET_RS( instr );
+			printf( " $%s", mips_reg_names[rs] );
+		}
+		else if( op_type == RT )
+		{
+			rt = GET_RT( instr );
+			printf( " $%s", mips_reg_names[rt] );
+		}
+		else if( op_type == RD )
+		{
+			rd = GET_RD( instr );
+			printf( " $%s", mips_reg_names[rd] );
+		}
+		else if( op_type == IMMED )
+		{
+			immed = GET_IMMED( instr );
+			printf( " 0x%04x", immed );
+		}
+		else if( op_type == ADDRESS )
+		{
+			address = GET_ADDRESS( instr );
+			printf( " 0x%07x", address );
+		}
 	}
 
 	printf( "\n" );
