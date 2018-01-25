@@ -360,6 +360,10 @@ void print_instruction( uint32_t addr )
 			address = GET_ADDRESS( instr );
 			printf( " 0x%07x", address );
 		}
+		else
+		{
+			break;
+		}
 	}
 
 	printf( "\n" );
