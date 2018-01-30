@@ -8,6 +8,7 @@
 #define GET_RS(x)			( ( x >> 21 ) & 0x1F )
 #define GET_RT(x)			( ( x >> 16 ) & 0x1F )
 #define GET_RD(x)			( ( x >> 11 ) & 0x1F )
+#define GET_SA(x)			( ( x >> 6  ) & 0x1F )
 #define GET_FUNCTCODE(x)	( x & 0x0000003F )
 #define GET_IMMED(x)		( x & 0xFFFF )
 #define GET_ADDRESS(x)		( x & 0x3FFFFFF )
