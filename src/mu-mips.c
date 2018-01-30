@@ -312,9 +312,7 @@ void print_program()
 void print_instruction( uint32_t addr )
 {
 	uint32_t instr;
-	uint8_t rd;
-	uint8_t rs;
-	uint8_t rt;
+	uint8_t rd, rs, rt, sa;
 	uint16_t immed;
 	uint32_t address;
 	mips_instr_t instr_info;
@@ -349,6 +347,11 @@ void print_instruction( uint32_t addr )
 		{
 			rd = GET_RD( instr );
 			printf( " $%s", mips_reg_names[rd] );
+		}
+		else if (op_type == SA)
+		{
+			sa = GET_SA(instr);
+			printf(" 0x%04x", sa );
 		}
 		else if( op_type == IMMED )
 		{
