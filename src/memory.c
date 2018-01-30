@@ -5,6 +5,7 @@
 
 #include "memory.h"
 #include "mu-mips.h"
+#include "Instructions.h"
 
 mem_region_t MEM_REGIONS[] =
 {	// Start			End				Addr
@@ -99,7 +100,7 @@ void rdump()
 	printf( "-------------------------------------\n" );
 	for( i = 0; i < MIPS_REGS; i++ )
 	{
-		printf( "[R%d]\t: 0x%08x\n", i, CURRENT_STATE.REGS[i] );
+		printf( "[%s]\t: 0x%08x\n", mips_reg_names[i], CURRENT_STATE.REGS[i] );
 	}
 	printf( "-------------------------------------\n" );
 	printf( "[HI]\t: 0x%08x\n", CURRENT_STATE.HI );
