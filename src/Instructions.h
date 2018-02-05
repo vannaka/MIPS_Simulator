@@ -9,7 +9,7 @@
 #define GET_RT(x)			( ( x >> 16 ) & 0x1F )
 #define GET_RD(x)			( ( x >> 11 ) & 0x1F )
 #define GET_SA(x)			( ( x >> 6  ) & 0x1F )
-#define GET_FUNCTCODE(x)	( x & 0x0000003F )
+#define GET_FUNCTCODE(x)	( x & 0x3F )
 #define GET_IMMED(x)		( x & 0xFFFF )
 #define GET_ADDRESS(x)		( x & 0x3FFFFFF )
 
@@ -51,8 +51,16 @@ extern mips_instr_t opcode_0x01_table[];
 extern mips_instr_t mips_instr_lookup[];
 extern char mips_reg_names[][5];
 
+
+// Function Declarations
+mips_instr_t mips_instr_decode( uint32_t instr );
+
 // Declare instruction handlers
 void instr_handler_LUI();
-mips_instr_t mips_instr_decode( uint32_t instr );
+void instr_handler_SLL();
+void instr_handler_SRL();
+void instr_handler_SRA();
+void instr_handler_JR();
+void instr_handler_JALR();
 
 #endif // ! INSTRUCTIONS_H

@@ -7,11 +7,11 @@
 mips_instr_t opcode_0x00_table[0x2A + 1] =
 {
 			// Name			type	OCode	FCode	Makeup			FPtr	SubTable
-	[0x00] = { "SLL",		R_TYPE, 0x00,	0x00,	{RD, RT, SA},	NULL,	NULL },
-	[0x02] = { "SRL",		R_TYPE, 0x00,	0x02,	{RD, RT, SA},	NULL,	NULL },
-	[0x03] = { "SRA",		R_TYPE, 0x00,	0x03,	{RD, RT, SA},	NULL,	NULL },
-	[0x08] = { "JR",		R_TYPE, 0x00,	0x08,	{RS},			NULL,	NULL },
-	[0x09] = { "JALR",		R_TYPE, 0x00,	0x09,	{RD, RS},		NULL,	NULL },
+	[0x00] = { "SLL",		R_TYPE, 0x00,	0x00,	{RD, RT, SA},	&instr_handler_SLL,		NULL },
+	[0x02] = { "SRL",		R_TYPE, 0x00,	0x02,	{RD, RT, SA},	&instr_handler_SRL,		NULL },
+	[0x03] = { "SRA",		R_TYPE, 0x00,	0x03,	{RD, RT, SA},	&instr_handler_SRA,		NULL },
+	[0x08] = { "JR",		R_TYPE, 0x00,	0x08,	{RS},			&instr_handler_JR,		NULL },
+	[0x09] = { "JALR",		R_TYPE, 0x00,	0x09,	{RD, RS},		&instr_handler_JALR,	NULL },
 	[0x0C] = { "SYSCALL",	R_TYPE, 0x00,	0x0C,	{INV},			NULL,	NULL },
 	[0x10] = { "MFHI",		R_TYPE, 0x00,	0x10,	{RD},			NULL,	NULL },
 	[0x11] = { "MTHI",		R_TYPE, 0x00,	0x11,	{RS},			NULL,	NULL },
@@ -138,6 +138,90 @@ void instr_handler_LUI()
 	printf( "LUI executed\n\n" );
 }
 
-// ADD INSTRUCTION HANDLERS HERE
+void instr_handler_JALR()
+{
 
-// DON'T FORGET TO ADD THEIR DECLARATIONS IN THE HEADER FILE
+}
+
+void instr_handler_JR()
+{
+	uint32_t instr;
+	int32_t rs_val;
+	uint8_t rs;
+
+	// Get instruction
+	instr = mem_read_32(CURRENT_STATE.PC);
+
+	rs = GET_RS(instr);
+	rs_val = CURRENT_STATE.REGS[rs];
+
+	// jump to specified address
+	NEXT_STATE.PC = rs_val;
+}
+
+void instr_handler_SRA()
+{
+	uint32_t instr;
+	int32_t rt_val;
+	uint8_t rt, rd, sa;
+
+	// Get instruction
+	instr = mem_read_32(CURRENT_STATE.PC);
+
+	rt = GET_RT(instr);
+	rd = GET_RD(rd);
+	sa = GET_SA(sa);
+	rt_val = CURRENT_STATE.REGS[rt];
+
+	// Shift right and sign extend
+	rt_val >> sa;
+	NEXT_STATE.REGS[rd] = rt_val;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+void instr_handler_SLL()
+{
+	uint32_t instr;
+	uint32_t rt_val;
+	uint8_t rt, rd, sa;
+
+	// Get instruction
+	instr = mem_read_32(CURRENT_STATE.PC);
+
+	rt = GET_RT(instr);
+	rd = GET_RD(rd);
+	sa = GET_SA(sa);
+	rt_val = CURRENT_STATE.REGS[rt];
+
+	// Shift left and zero extend
+	rt_val << sa;
+	NEXT_STATE.REGS[rd] = rt_val;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+void instr_handler_SRL()
+{
+	uint32_t instr;
+	uint32_t rt_val;
+	uint8_t rt, rd, sa;
+
+	// Get instruction
+	instr = mem_read_32(CURRENT_STATE.PC);
+
+	rt = GET_RT(instr);
+	rd = GET_RD(rd);
+	sa = GET_SA(sa);
+	rt_val = CURRENT_STATE.REGS[rt];
+
+	// Shift right and zero extend
+	rt_val >> sa;
+	NEXT_STATE.REGS[rd] = rt_val;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
