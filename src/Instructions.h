@@ -63,4 +63,22 @@ void instr_handler_SRA();
 void instr_handler_JR();
 void instr_handler_JALR();
 
+void instr_handler_BEQ();
+void instr_handler_BNE();
+void instr_handler_BLEZ();
+void instr_handler_BGTZ();
+void instru_handler_ADDI();
+void instru_handler_ADDIU();
+void instru_handler_SLTI();
+void instru_handler_ANDI();
+void instru_handler_ORI();
+void instru_handler_XORI();
+void instr_handler_LUI();
+void instr_handler_LB();
+void instr_handler_LH();
+void instr_handler_LW();
+void instr_handler_SB();
+void instr_handler_SH();
+void instr_handler_SW();
+
 #endif // ! INSTRUCTIONS_H
