@@ -647,7 +647,7 @@ void instr_handler_J()
 {
 	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
 	uint32_t target = GET_ADDRESS( instr );
-	NEXT_STATE.PC += target << 2;
+	NEXT_STATE.PC = ( CURRENT_STATE.PC & 0xF0000000 ) | ( target << 2 );
 }
 
 
@@ -655,8 +655,8 @@ void instr_handler_JAL()
 {
 	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
 	uint32_t target = GET_ADDRESS( instr );
-	NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
-	NEXT_STATE.PC += target << 2;
+	NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
+	NEXT_STATE.PC = ( CURRENT_STATE.PC & 0xF0000000 ) | ( target << 2 );
 }
 
 
