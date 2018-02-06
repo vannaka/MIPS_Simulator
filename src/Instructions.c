@@ -3,6 +3,7 @@
 
 #include "Instructions.h"
 #include "mu-mips.h"
+#include "memory.h"
 
 mips_instr_t opcode_0x00_table[0x2A + 1] =
 {
@@ -12,51 +13,51 @@ mips_instr_t opcode_0x00_table[0x2A + 1] =
 	[0x03] = { "SRA",		R_TYPE, 0x00,	0x03,	{RD, RT, SA},	&instr_handler_SRA,		NULL },
 	[0x08] = { "JR",		R_TYPE, 0x00,	0x08,	{RS},			&instr_handler_JR,		NULL },
 	[0x09] = { "JALR",		R_TYPE, 0x00,	0x09,	{RD, RS},		&instr_handler_JALR,	NULL },
-	[0x0C] = { "SYSCALL",	R_TYPE, 0x00,	0x0C,	{INV},			NULL,	NULL },
-	[0x10] = { "MFHI",		R_TYPE, 0x00,	0x10,	{RD},			NULL,	NULL },
-	[0x11] = { "MTHI",		R_TYPE, 0x00,	0x11,	{RS},			NULL,	NULL },
-	[0x12] = { "MFLO",		R_TYPE, 0x00,	0x12,	{RD},			NULL,	NULL },
-	[0x13] = { "MTLO",		R_TYPE, 0x00,	0x13,	{RS},			NULL,	NULL },
-	[0x18] = { "MULT",		R_TYPE, 0x00,	0x18,	{RS, RT},		NULL,	NULL },
-	[0x19] = { "MULTU",		R_TYPE, 0x00,	0x19,	{RS, RT},		NULL,	NULL },
-	[0x1A] = { "DIV",		R_TYPE, 0x00,	0x1A,	{RS, RT},		NULL,	NULL },
-	[0x1B] = { "DIVU",		R_TYPE, 0x00,	0x1B,	{RS, RT},		NULL,	NULL },
-	[0x20] = { "ADD",		R_TYPE,	0x00,	0x20,	{RD, RS, RT},	NULL,	NULL },
-	[0x21] = { "ADDU",		R_TYPE, 0x00,	0x21,	{RD, RS,RT},	NULL,	NULL },
-	[0x22] = { "SUB",		R_TYPE, 0x00,	0x22,	{RD, RS, RT},	NULL,	NULL },
-	[0x23] = { "SUBU",		R_TYPE, 0x00,	0x23,	{RD, RS, RT},	NULL,	NULL },
-	[0x24] = { "AND",		R_TYPE, 0x00,	0x24,	{RD, RS, RT},	NULL,	NULL },
-	[0x25] = { "OR",		R_TYPE, 0x00,	0x25,	{RD, RS, RT},	NULL,	NULL },
-	[0x26] = { "XOR",		R_TYPE, 0x00,	0x26,	{RD, RS, RT},	NULL,	NULL },
-	[0x27] = { "NOR",		R_TYPE, 0x00,	0x27,	{RD, RS, RT},	NULL,	NULL },
-	[0x2A] = { "SLT",		R_TYPE, 0x00,	0x2A,	{RD, RS, RT},	NULL,	NULL }
+	[0x0C] = { "SYSCALL",	R_TYPE, 0x00,	0x0C,	{ },			&instr_handler_SYSCALL,	NULL },
+	[0x10] = { "MFHI",		R_TYPE, 0x00,	0x10,	{RD},			&instr_handler_MFHI,	NULL },
+	[0x11] = { "MTHI",		R_TYPE, 0x00,	0x11,	{RS},			&instr_handler_MTHI,	NULL },
+	[0x12] = { "MFLO",		R_TYPE, 0x00,	0x12,	{RD},			&instr_handler_MFLO,	NULL },
+	[0x13] = { "MTLO",		R_TYPE, 0x00,	0x13,	{RS},			&instr_handler_MTLO,	NULL },
+	[0x18] = { "MULT",		R_TYPE, 0x00,	0x18,	{RS, RT},		&instr_handler_MULT,	NULL },
+	[0x19] = { "MULTU",		R_TYPE, 0x00,	0x19,	{RS, RT},		&instr_handler_MULTU,	NULL },
+	[0x1A] = { "DIV",		R_TYPE, 0x00,	0x1A,	{RS, RT},		&instr_handler_DIV,		NULL },
+	[0x1B] = { "DIVU",		R_TYPE, 0x00,	0x1B,	{RS, RT},		&instr_handler_DIVU,	NULL },
+	[0x20] = { "ADD",		R_TYPE,	0x00,	0x20,	{RD, RS, RT},	&instr_handler_ADD,		NULL },
+	[0x21] = { "ADDU",		R_TYPE, 0x00,	0x21,	{RD, RS, RT},	&instr_handler_ADDU,	NULL },
+	[0x22] = { "SUB",		R_TYPE, 0x00,	0x22,	{RD, RS, RT},	&instr_handler_SUB,		NULL },
+	[0x23] = { "SUBU",		R_TYPE, 0x00,	0x23,	{RD, RS, RT},	&instr_handler_SUBU,	NULL },
+	[0x24] = { "AND",		R_TYPE, 0x00,	0x24,	{RD, RS, RT},	&instr_handler_AND,		NULL },
+	[0x25] = { "OR",		R_TYPE, 0x00,	0x25,	{RD, RS, RT},	&instr_handler_OR,		NULL },
+	[0x26] = { "XOR",		R_TYPE, 0x00,	0x26,	{RD, RS, RT},	&instr_handler_XOR,		NULL },
+	[0x27] = { "NOR",		R_TYPE, 0x00,	0x27,	{RD, RS, RT},	&instr_handler_NOR,		NULL },
+	[0x2A] = { "SLT",		R_TYPE, 0x00,	0x2A,	{RD, RS, RT},	&instr_handler_SLT,		NULL }
 };
 
 mips_instr_t opcode_0x01_table[2] =
 {
-			// Name			type	OCode	FCode	Makeup			FPtr	SubTable
-	[0x00] = { "BLTZ",		I_TYPE,	0x01,	0x00,	{RS, IMMED},	NULL,	NULL },
-	[0x01] = { "BGEZ",		I_TYPE, 0x01,	0x00,	{RS, IMMED},	NULL,	NULL }
+			// Name			type	OCode	FCode	Makeup			FPtr					SubTable
+	[0x00] = { "BLTZ",		I_TYPE,	0x01,	0x00,	{RS, IMMED},	&instr_handler_BLTZ,	NULL },
+	[0x01] = { "BGEZ",		I_TYPE, 0x01,	0x00,	{RS, IMMED},	&instr_handler_BGEZ,	NULL }
 };
 
 
 mips_instr_t mips_instr_lookup[0x2B + 1] =
 {
 			//  Name		type	OCode	FCode	Makeup				FunctPtr					SubTable
-	[0x00] = { "XXXX",		M_TYPE,	0x00,	0x00,	{},					NULL,						opcode_0x00_table },
-	[0x01] = { "XXXX",		M_TYPE,	0x01,	0x00,	{},					NULL,						opcode_0x01_table },
-	[0x02] = { "J",			J_TYPE,	0x02,	0x00,	{ADDRESS},			NULL,						NULL },
-	[0x03] = { "JAL",		J_TYPE,	0x03,	0x00,	{ADDRESS},			NULL,						NULL },
+	[0x00] = { "XXXX",		M_TYPE,	0x00,	0x00,	{ },				NULL,						opcode_0x00_table },
+	[0x01] = { "XXXX",		M_TYPE,	0x01,	0x00,	{ },				NULL,						opcode_0x01_table },
+	[0x02] = { "J",			J_TYPE,	0x02,	0x00,	{ADDRESS},			&instr_handler_J,			NULL },
+	[0x03] = { "JAL",		J_TYPE,	0x03,	0x00,	{ADDRESS},			&instr_handler_JAL,			NULL },
 	[0x04] = { "BEQ",		I_TYPE,	0x04,	0x00,	{RS, RT, IMMED},	&instr_handler_BEQ,			NULL },
 	[0x05] = { "BNE",		I_TYPE,	0x05,	0x00,	{RS, RT, IMMED},	&instr_handler_BNE,			NULL },
 	[0x06] = { "BLEZ",		I_TYPE,	0x06,	0x00,	{RS, IMMED},		&instr_handler_BLEZ,		NULL },
 	[0x07] = { "BGTZ",		I_TYPE,	0x07,	0x00,	{RS, IMMED},		&instr_handler_BGTZ,		NULL },
-	[0x08] = { "ADDI",		I_TYPE,	0x08,	0x00,	{RT, RS, IMMED},	&instru_handler_ADDI,		NULL },
-	[0x09] = { "ADDIU",		I_TYPE,	0x09,	0x00,	{RT, RS, IMMED},	&instru_handler_ADDIU,		NULL },
-	[0x0A] = { "SLTI",		I_TYPE,	0x0A,	0x00,	{RT, RS, IMMED},	&instru_handler_SLTI,		NULL },
-	[0x0C] = { "ANDI",		I_TYPE,	0x0C,	0x00,	{RT, RS, IMMED},	&instru_handler_ANDI,		NULL },
-	[0x0D] = { "ORI",		I_TYPE,	0x0D,	0x00,	{RT, RS, IMMED},	&instru_handler_ORI,		NULL },
-	[0x0E] = { "XORI",		I_TYPE,	0x0E,	0x00,	{RT, RS, IMMED},	&instru_handler_XORI,		NULL },
+	[0x08] = { "ADDI",		I_TYPE,	0x08,	0x00,	{RT, RS, IMMED},	&instr_handler_ADDI,		NULL },
+	[0x09] = { "ADDIU",		I_TYPE,	0x09,	0x00,	{RT, RS, IMMED},	&instr_handler_ADDIU,		NULL },
+	[0x0A] = { "SLTI",		I_TYPE,	0x0A,	0x00,	{RT, RS, IMMED},	&instr_handler_SLTI,		NULL },
+	[0x0C] = { "ANDI",		I_TYPE,	0x0C,	0x00,	{RT, RS, IMMED},	&instr_handler_ANDI,		NULL },
+	[0x0D] = { "ORI",		I_TYPE,	0x0D,	0x00,	{RT, RS, IMMED},	&instr_handler_ORI,			NULL },
+	[0x0E] = { "XORI",		I_TYPE,	0x0E,	0x00,	{RT, RS, IMMED},	&instr_handler_XORI,		NULL },
 	[0x0F] = { "LUI",		I_TYPE,	0x0F,	0x00,	{RT, IMMED},		&instr_handler_LUI,         NULL },
 	[0x20] = { "LB",		I_TYPE,	0x20,	0x00,	{RT, IMMED, RS},	&instr_handler_LB,          NULL },
 	[0x21] = { "LH",		I_TYPE,	0x21,	0x00,	{RT, IMMED, RS},	&instr_handler_LH,			NULL },
@@ -133,53 +134,6 @@ mips_instr_t mips_instr_decode( uint32_t instr )
 	return instr_info;
 }
 
-void instr_handler_LUI()
-{
-	printf( "LUI executed\n\n" );
-}
-
-void instr_handler_JALR()
-{
-
-}
-
-void instr_handler_JR()
-{
-	uint32_t instr;
-	int32_t rs_val;
-	uint8_t rs;
-
-	// Get instruction
-	instr = mem_read_32(CURRENT_STATE.PC);
-
-	rs = GET_RS(instr);
-	rs_val = CURRENT_STATE.REGS[rs];
-
-	// jump to specified address
-	NEXT_STATE.PC = rs_val;
-}
-
-void instr_handler_SRA()
-{
-	uint32_t instr;
-	int32_t rt_val;
-	uint8_t rt, rd, sa;
-
-	// Get instruction
-	instr = mem_read_32(CURRENT_STATE.PC);
-
-	rt = GET_RT(instr);
-	rd = GET_RD(rd);
-	sa = GET_SA(sa);
-	rt_val = CURRENT_STATE.REGS[rt];
-
-	// Shift right and sign extend
-	rt_val >> sa;
-	NEXT_STATE.REGS[rd] = rt_val;
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
-}
 
 void instr_handler_SLL()
 {
@@ -190,14 +144,14 @@ void instr_handler_SLL()
 	// Get instruction
 	instr = mem_read_32(CURRENT_STATE.PC);
 
-	rt = GET_RT(instr);
-	rd = GET_RD(rd);
-	sa = GET_SA(sa);
+	// Get values
+	rt = GET_RT( instr );
+	rd = GET_RD( instr );
+	sa = GET_SA( instr );
 	rt_val = CURRENT_STATE.REGS[rt];
 
-	// Shift left and zero extend
-	rt_val << sa;
-	NEXT_STATE.REGS[rd] = rt_val;
+	// Shift left
+	NEXT_STATE.REGS[rd] = rt_val << sa;
 
 	// Increment program counter
 	NEXT_STATE.PC += 4;
@@ -212,17 +166,497 @@ void instr_handler_SRL()
 	// Get instruction
 	instr = mem_read_32(CURRENT_STATE.PC);
 
-	rt = GET_RT(instr);
-	rd = GET_RD(rd);
-	sa = GET_SA(sa);
+	// Get values
+	rt = GET_RT( instr );
+	rd = GET_RD( instr );
+	sa = GET_SA( instr );
 	rt_val = CURRENT_STATE.REGS[rt];
 
 	// Shift right and zero extend
-	rt_val >> sa;
-	NEXT_STATE.REGS[rd] = rt_val;
+	NEXT_STATE.REGS[rd] = rt_val >> sa;
 
 	// Increment program counter
 	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_SRA()
+{
+	uint32_t instr;
+	int32_t rt_val;
+	uint8_t rt, rd, sa;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	// Get values
+	rt = GET_RT( instr );
+	rd = GET_RD( instr );
+	sa = GET_SA( instr );
+	rt_val = CURRENT_STATE.REGS[rt];
+
+	// Shift right and sign extend
+	NEXT_STATE.REGS[rd] = rt_val >> sa;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_JR()
+{
+	uint32_t instr;
+	int32_t rs_val;
+	uint8_t rs;
+
+	// Get instruction
+	instr = mem_read_32(CURRENT_STATE.PC);
+
+	// Get values
+	rs = GET_RS(instr);
+	rs_val = CURRENT_STATE.REGS[rs];
+
+	// jump to specified address
+	NEXT_STATE.PC = rs_val;
+}
+
+
+void instr_handler_JALR()
+{
+	uint32_t instr;
+	int32_t rs_val;
+	uint8_t rs, rd;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	// Get values
+	rs = GET_RS( instr );
+	rd = GET_RD( instr );
+	rs_val = CURRENT_STATE.REGS[rs];
+
+	// save return addr
+	NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
+
+	// jmp to new addr
+	NEXT_STATE.PC = rs_val;
+}
+
+
+void instr_handler_SYSCALL()
+{
+	//TODO: Issue system call exception
+}
+
+
+void instr_handler_MFHI()
+{
+	uint32_t instr;
+	int32_t HI_val;
+	uint8_t rd;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	// Get values
+	rd = GET_RD( instr );
+	HI_val = NEXT_STATE.HI;
+
+	// put contents of HI into rd
+	NEXT_STATE.REGS[rd] = HI_val;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_MTHI()
+{
+	uint32_t instr;
+	int32_t rs_val;
+	uint8_t rs;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	rs = GET_RS( instr );
+	rs_val = CURRENT_STATE.REGS[rs];
+
+	// put contents of rs into HI
+	NEXT_STATE.HI = rs_val;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_MFLO()
+{
+	uint32_t instr;
+	int32_t LO_val;
+	uint8_t rd;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	// Get values
+	rd = GET_RD( instr );
+	LO_val = NEXT_STATE.LO;
+
+	// put contents of LO into rd
+	NEXT_STATE.REGS[rd] = LO_val;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_MTLO()
+{
+	uint32_t instr;
+	int32_t rs_val;
+	uint8_t rs;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	rs = GET_RS( instr );
+	rs_val = CURRENT_STATE.REGS[rs];
+
+	// put contents of rs into LO
+	NEXT_STATE.LO = rs_val;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_MULT()
+{
+	uint32_t instr;
+	int32_t rs_val, rd_val;
+	uint8_t rs, rd;
+	int64_t result;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	// Get values
+	rs = GET_RS( instr );
+	rd = GET_RD( instr );
+	rs_val = CURRENT_STATE.REGS[rs];
+	rd_val = CURRENT_STATE.REGS[rd];
+
+	// multiply
+	result = rs_val * rd_val;
+
+	// Save result
+	NEXT_STATE.HI = ( result >> 32 );
+	NEXT_STATE.LO = ( result & 0xFFFFFFFF );
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_MULTU()
+{
+	uint32_t instr;
+	uint32_t rs_val, rd_val;
+	uint8_t rs, rd;
+	uint64_t result;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	// Get values
+	rs = GET_RS( instr );
+	rd = GET_RD( instr );
+	rs_val = CURRENT_STATE.REGS[rs];
+	rd_val = CURRENT_STATE.REGS[rd];
+
+	// multiply
+	result = rs_val * rd_val;
+
+	// Save result
+	NEXT_STATE.HI = ( result >> 32 );
+	NEXT_STATE.LO = ( result & 0xFFFFFFFF );
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_DIV()
+{
+	uint32_t instr;
+	int32_t rs_val, rt_val;
+	uint8_t rs, rt;
+	int32_t quotient, remainder;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	// Get values
+	rs = GET_RS( instr );
+	rt = GET_RT( instr );
+	rs_val = CURRENT_STATE.REGS[rs];
+	rt_val = CURRENT_STATE.REGS[rt];
+
+	// divide
+	quotient = rs_val / rt_val;
+	remainder = rs_val % rt_val;
+
+	// Save result
+	NEXT_STATE.HI = remainder;
+	NEXT_STATE.LO = quotient;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_DIVU()
+{
+	uint32_t instr;
+	uint32_t rs_val, rt_val;
+	uint8_t rs, rt;
+	uint32_t quotient, remainder;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	// Get values
+	rs = GET_RS( instr );
+	rt = GET_RT( instr );
+	rs_val = CURRENT_STATE.REGS[rs];
+	rt_val = CURRENT_STATE.REGS[rt];
+
+	// divide
+	quotient = rs_val / rt_val;
+	remainder = rs_val % rt_val;
+
+	// Save result
+	NEXT_STATE.HI = remainder;
+	NEXT_STATE.LO = quotient;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_ADD()
+{
+	uint32_t instr;
+	int32_t rs_val, rt_val;
+	uint8_t rs, rt, rd;
+	int32_t result;
+
+	// Get instruction
+	instr = mem_read_32( CURRENT_STATE.PC );
+
+	// Get values
+	rs = GET_RS( instr );
+	rt = GET_RT( instr );
+	rd = GET_RD( instr );
+	rs_val = CURRENT_STATE.REGS[rs];
+	rt_val = CURRENT_STATE.REGS[rt];
+
+	// Add numbers
+	result = rs_val + rt_val;
+
+	// Save results
+	NEXT_STATE.REGS[rd] = result;
+
+	// Increment program counter
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_ADDU()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint8_t rs = GET_RS( instr );
+	uint8_t rt = GET_RT( instr );
+	uint8_t rd = GET_RD( instr );
+
+	NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
+	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
+	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
+	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
+
+	printf( "\tADDU executed" );
+
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_SUB()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint8_t rs = GET_RS( instr );
+	uint8_t rt = GET_RT( instr );
+	uint8_t rd = GET_RD( instr );
+
+	NEXT_STATE.REGS[rd] = (int)CURRENT_STATE.REGS[rs] - (int)CURRENT_STATE.REGS[rt];
+	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
+	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
+	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
+
+	printf( "\tSUB executed" );
+
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_SUBU()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint8_t rs = GET_RS( instr );
+	uint8_t rt = GET_RT( instr );
+	uint8_t rd = GET_RD( instr );
+
+	NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
+	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
+	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
+	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
+
+	printf( "\tSUBU executed" );
+
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_AND()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint8_t rs = GET_RS( instr );
+	uint8_t rt = GET_RT( instr );
+	uint8_t rd = GET_RD( instr );
+
+	NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
+	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
+	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
+	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
+
+	printf( "\tAND executed" );
+
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_OR()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint8_t rs = GET_RS( instr );
+	uint8_t rt = GET_RT( instr );
+	uint8_t rd = GET_RD( instr );
+
+	NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
+	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
+	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
+	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
+
+	printf( "\tOR executed" );
+
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_XOR()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint8_t rs = GET_RS( instr );
+	uint8_t rt = GET_RT( instr );
+	uint8_t rd = GET_RD( instr );
+
+	NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] ^ CURRENT_STATE.REGS[rt];
+	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
+	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
+	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
+
+	printf( "\tXOR executed" );
+
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_NOR()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint8_t rs = GET_RS( instr );
+	uint8_t rt = GET_RT( instr );
+	uint8_t rd = GET_RD( instr );
+
+	NEXT_STATE.REGS[rd] = ~( CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt] );
+	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
+	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
+	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
+
+	printf( "\tNOR executed" );
+
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_SLT()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint8_t rs = GET_RS( instr );
+	uint8_t rt = GET_RT( instr );
+	uint8_t rd = GET_RD( instr );
+
+	NEXT_STATE.REGS[rd] = ( CURRENT_STATE.REGS[rs] < CURRENT_STATE.REGS[rt] ) ? 1 : 0;
+	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
+	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
+	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
+
+	printf( "\tSLT executed" );
+
+	NEXT_STATE.PC += 4;
+}
+
+
+void instr_handler_BLTZ()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint8_t rs = GET_RS( instr );
+	uint16_t immed = GET_IMMED( instr );
+
+	if( CURRENT_STATE.REGS[rs] < 0x0 )
+	{
+		NEXT_STATE.PC = NEXT_STATE.PC + 4 + immed;
+	}
+}
+
+
+void instr_handler_BGEZ()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint8_t rs = GET_RS( instr );
+	uint16_t immed = GET_IMMED( instr );
+
+	if( CURRENT_STATE.REGS[rs] >= 0x0 )
+	{
+		NEXT_STATE.PC = NEXT_STATE.PC + 4 + immed;
+	}
+}
+
+
+void instr_handler_J()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint32_t target = GET_ADDRESS( instr );
+	NEXT_STATE.PC += target << 2;
+}
+
+
+void instr_handler_JAL()
+{
+	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint32_t target = GET_ADDRESS( instr );
+	NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
+	NEXT_STATE.PC += target << 2;
 }
 
 
@@ -316,7 +750,7 @@ void instr_handler_BGTZ()
 
 
 //add a registers value and an immediate - signed
-void instru_handler_ADDI()
+void instr_handler_ADDI()
 {
 	//get the instruction
 	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
@@ -338,7 +772,7 @@ void instru_handler_ADDI()
 
 
 //add a registers value and an immediate - unsigned
-void instru_handler_ADDIU()
+void instr_handler_ADDIU()
 {
 	//get the instruction
 	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
@@ -360,7 +794,7 @@ void instru_handler_ADDIU()
 
 
 //set less then immediate - signed
-void instru_handler_SLTI()
+void instr_handler_SLTI()
 {
 	//get the instruction
 	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
@@ -385,7 +819,7 @@ void instru_handler_SLTI()
 
 
 //and immediate
-void instru_handler_ANDI()
+void instr_handler_ANDI()
 {
 	//get the instruction
 	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
@@ -407,7 +841,7 @@ void instru_handler_ANDI()
 
 
 //or immediate
-void instru_handler_ORI()
+void instr_handler_ORI()
 {
 	//get the instruction
 	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
@@ -429,7 +863,7 @@ void instru_handler_ORI()
 
 
 //exclusive or immediate
-void instru_handler_XORI()
+void instr_handler_XORI()
 {
 	//get the instruction
 	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
