@@ -253,7 +253,7 @@ void instr_handler_SYSCALL()
 	{
 	// exit program
 	case 0x0A:
-		exit( 0 );
+		RUN_FLAG = 0;
 	default:
 		return;
 	}
