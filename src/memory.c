@@ -32,10 +32,10 @@ uint32_t mem_read_32( uint32_t address )
 			( address <= MEM_REGIONS[i].end ) )
 		{
 			uint32_t offset = address - MEM_REGIONS[i].begin;
-			return ( MEM_REGIONS[i].mem[offset + 3] << 24 ) |
-				( MEM_REGIONS[i].mem[offset + 2] << 16 ) |
-				( MEM_REGIONS[i].mem[offset + 1] << 8 ) |
-				( MEM_REGIONS[i].mem[offset + 0] << 0 );
+			return	( MEM_REGIONS[i].mem[offset + 3] << 24 ) |
+					( MEM_REGIONS[i].mem[offset + 2] << 16 ) |
+					( MEM_REGIONS[i].mem[offset + 1] << 8 ) |
+					( MEM_REGIONS[i].mem[offset + 0] << 0 );
 		}
 	}
 	return 0;

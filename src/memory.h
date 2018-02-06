@@ -40,7 +40,7 @@ extern mem_region_t MEM_REGIONS[];
 
 
 /******************************************************************************/
-/* Function declarations                                                       */
+/* Function declarations                                                      */
 /******************************************************************************/
 uint32_t mem_read_32( uint32_t address );
 void mem_write_32( uint32_t address, uint32_t value );

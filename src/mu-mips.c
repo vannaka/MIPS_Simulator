@@ -63,6 +63,8 @@ void run( int num_cycles )
 			printf("Simulation Stopped.\n\n");
 			break;
 		}
+		printf( "[0x%x]\t", CURRENT_STATE.PC );
+		print_instruction( CURRENT_STATE.PC );
 		cycle();
 	}
 }
@@ -99,7 +101,7 @@ void handle_command()
 	int register_value;
 	int hi_reg_value, lo_reg_value;
 
-	printf( "MU-MIPS SIM:> " );
+	printf( "\nMU-MIPS SIM:> " );
 
 	if( scanf( "%s", buffer ) == EOF )
 	{
