@@ -9,11 +9,11 @@ ASM_OBJS = assembler.o $(SHARED_OBJS)
 %.o: %.c
 	$(CC_GCC) -c -o $@ $< $(CFLAGS)
 
-mu-mips: $(SIM_OBJS)
-	$(CC_GCC) -o mu-mips $(SIM_OBJS) $(CFLAGS)
+sim-mips: $(SIM_OBJS)
+	$(CC_GCC) -o sim-mips $(SIM_OBJS) $(CFLAGS)
 
 ass-mips: $(ASM_OBJS)
-	$(CC_GCC) -o ass-mips $(ASM_OBJS) $(CFLAGS)
+	$(CC_GCC) -o asm-mips $(ASM_OBJS) $(CFLAGS)
 
 clean:
 	rm -f mu-mips ass-mips $(SIM_OBJS) $(ASM_OBJS)
