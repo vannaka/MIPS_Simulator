@@ -481,11 +481,6 @@ void instr_handler_ADDU()
 	uint8_t rd = GET_RD( instr );
 
 	NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
-	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
-	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
-	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
-
-	printf( "\tADDU executed" );
 
 	NEXT_STATE.PC += 4;
 }
@@ -499,11 +494,6 @@ void instr_handler_SUB()
 	uint8_t rd = GET_RD( instr );
 
 	NEXT_STATE.REGS[rd] = (int)CURRENT_STATE.REGS[rs] - (int)CURRENT_STATE.REGS[rt];
-	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
-	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
-	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
-
-	printf( "\tSUB executed" );
 
 	NEXT_STATE.PC += 4;
 }
@@ -517,11 +507,6 @@ void instr_handler_SUBU()
 	uint8_t rd = GET_RD( instr );
 
 	NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
-	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
-	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
-	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
-
-	printf( "\tSUBU executed" );
 
 	NEXT_STATE.PC += 4;
 }
@@ -535,11 +520,6 @@ void instr_handler_AND()
 	uint8_t rd = GET_RD( instr );
 
 	NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
-	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
-	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
-	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
-
-	printf( "\tAND executed" );
 
 	NEXT_STATE.PC += 4;
 }
@@ -553,11 +533,6 @@ void instr_handler_OR()
 	uint8_t rd = GET_RD( instr );
 
 	NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
-	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
-	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
-	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
-
-	printf( "\tOR executed" );
 
 	NEXT_STATE.PC += 4;
 }
@@ -571,11 +546,6 @@ void instr_handler_XOR()
 	uint8_t rd = GET_RD( instr );
 
 	NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] ^ CURRENT_STATE.REGS[rt];
-	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
-	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
-	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
-
-	printf( "\tXOR executed" );
 
 	NEXT_STATE.PC += 4;
 }
@@ -589,11 +559,6 @@ void instr_handler_NOR()
 	uint8_t rd = GET_RD( instr );
 
 	NEXT_STATE.REGS[rd] = ~( CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt] );
-	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
-	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
-	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
-
-	printf( "\tNOR executed" );
 
 	NEXT_STATE.PC += 4;
 }
@@ -607,11 +572,6 @@ void instr_handler_SLT()
 	uint8_t rd = GET_RD( instr );
 
 	NEXT_STATE.REGS[rd] = ( CURRENT_STATE.REGS[rs] < CURRENT_STATE.REGS[rt] ) ? 1 : 0;
-	printf( "\nrd = 0x%08x", NEXT_STATE.REGS[rd] );
-	printf( "\trs = 0x%08x", CURRENT_STATE.REGS[rs] );
-	printf( "\trt = 0x%08x", CURRENT_STATE.REGS[rt] );
-
-	printf( "\tSLT executed" );
 
 	NEXT_STATE.PC += 4;
 }
@@ -760,11 +720,11 @@ void instr_handler_ADDI()
 	uint8_t rt = GET_RT( instr );
 	int16_t immed = GET_IMMED( instr );
 
-	//get the value from register rt - signed
-	int32_t rt_val = CURRENT_STATE.REGS[rt];
+	//get the value from register rs - signed
+	int32_t rs_val = CURRENT_STATE.REGS[rs];
 
-	//add the immediate value to the value in register rt and place it in rs - signed
-	NEXT_STATE.REGS[rs] = rt_val + immed;
+	//add the immediate value to the value in register rs and place it in rt - signed
+	NEXT_STATE.REGS[rt] = rs_val + immed;
 
 	//bump the program counter
 	NEXT_STATE.PC += 4;
