@@ -245,7 +245,18 @@ void instr_handler_JALR()
 
 void instr_handler_SYSCALL()
 {
-	//TODO: Issue system call exception
+	int32_t v0_val;
+
+	v0_val = CURRENT_STATE.REGS[2];
+
+	switch( v0_val )
+	{
+	// exit program
+	case 0x0A:
+		exit( 0 );
+	default:
+		return;
+	}
 }
 
 
