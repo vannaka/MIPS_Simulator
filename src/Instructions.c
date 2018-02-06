@@ -782,11 +782,11 @@ void instr_handler_ADDIU()
 	uint8_t rt = GET_RT( instr );
 	uint16_t immed = GET_IMMED( instr );
 
-	//get the value from register rt - unsigned
-	uint32_t rt_val = CURRENT_STATE.REGS[rt];
+	//get the value from register rs - unsigned
+	uint32_t rs_val = CURRENT_STATE.REGS[rs];
 
-	//add the immediate value to the value in register rt and place it in rs - unsigned
-	NEXT_STATE.REGS[rs] = rt_val + immed;
+	//add the immediate value to the value in register rs and place it in rt - unsigned
+	NEXT_STATE.REGS[rt] = rs_val + immed;
 
 	//bump the program counter
 	NEXT_STATE.PC += 4;
