@@ -59,12 +59,18 @@ int main( int argc, char *argv[] )
 
 		// parse opcode
         instr_info = assem_decode_opcode( token );
+
+		// check for valid opcode
+		if( instr_info.type == INV_TYPE )
+		{
+			printf( "\n[ERROR] Invalid opcode %s on line %d\n", token, line_num );
+			remove( argv[2] );
+			exit( -1 );
+		}
         
         // set the op and funct codes in the instruction
         SET_OPCODE(hexInstr, instr_info.opcode);
         SET_FUNCTCODE(hexInstr, instr_info.funct_code);
-        
-        printf("\n%s", instr_info.name);
     
         // get the operands
         token = strtok( NULL, delim );
@@ -75,10 +81,10 @@ int main( int argc, char *argv[] )
             if( iRet == -1 )
             {
                 printf("\n[ERROR] Invalid operand %s on line %d\n", token, line_num );
+				remove( argv[2] );
                 exit(-1);
             }
             
-            printf(" %s", token);
             token = strtok( NULL, delim );
             
             i++;
@@ -86,11 +92,8 @@ int main( int argc, char *argv[] )
         
 		// save instruction to file
 		fprintf( fp_out, "%08x\n", hexInstr );
-        printf(" \t[%08x]", hexInstr );
         
     }
-    
-    printf("\n");
 
 	fclose( fp_in );
 	fclose( fp_out );
@@ -121,7 +124,7 @@ mips_instr_t assem_decode_opcode( char* str )
 
 		//check if the names match
 		if( ret == 0 )
-			return ( instr_info = mips_instr_lookup[i] );       //return instr_info structure
+			return ( mips_instr_lookup[i] );       //return instr_info structure
 		else
 			i++;      //bump counter
 	}
@@ -137,7 +140,7 @@ mips_instr_t assem_decode_opcode( char* str )
 
 		//check if the names match
 		if( ret == 0 )
-			return ( instr_info = opcode_0x00_table[i] );       //return instr_info structure
+			return ( opcode_0x00_table[i] );       //return instr_info structure
 		else
 			i++; //bump counter
 	}
@@ -154,12 +157,14 @@ mips_instr_t assem_decode_opcode( char* str )
 
 		//check if the names match
 		if( ret == 0 )
-			return ( instr_info = opcode_0x01_table[i] );       //return instr_info structure
+			return ( opcode_0x01_table[i] );       //return instr_info structure
 		else
 			i++;      //bump counter
 	}
 
-	//need a null return case
+	instr_info.type = INV_TYPE;
+
+	return instr_info;
 
 }
 
