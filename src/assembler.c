@@ -19,7 +19,7 @@ int main( int argc, char *argv[] )
     char* token;
     mips_instr_t instr_info;
     uint32_t hexInstr;
-    int iRet = 0, i = 0, line_num = 1;
+    int iRet = 0, i = 0, line_num = 0;
 	
     if( argc < 3 )
     {
@@ -46,11 +46,18 @@ int main( int argc, char *argv[] )
     // grab one line at a time
     while( getline( &instr_str, &instr_str_size, fp_in ) != EOF )
     {     
+		line_num++;
         hexInstr = 0;
         i = 0;
         
         // get the opcode
         token = strtok( instr_str, delim );
+
+		// throw out empty lines and comments
+		if( token == NULL ) continue;
+		else if( strcmp( token, "//" ) == 0 ) continue;
+
+		// parse opcode
         instr_info = assem_decode_opcode( token );
         
         // set the op and funct codes in the instruction
@@ -81,7 +88,6 @@ int main( int argc, char *argv[] )
 		fprintf( fp_out, "%08x\n", hexInstr );
         printf(" \t[%08x]", hexInstr );
         
-        line_num++;
     }
     
     printf("\n");
@@ -183,11 +189,11 @@ int GetRegister( char* szRegisterName ) {
 	switch( szRegisterName[0] )
 	{
 
-		// $zero
+	// $zero
 	case 'z':
 	case 'Z':	iRet = 0;	break;
 
-		// $at, $a0, $a1, $a2, $a3
+	// $at, $a0, $a1, $a2, $a3
 	case 'a':
 	case 'A':
 		switch( szRegisterName[1] )
@@ -202,7 +208,7 @@ int GetRegister( char* szRegisterName ) {
 		}
 		break;
 
-		// $v0, $v1
+	// $v0, $v1
 	case 'v':
 	case 'V':
 		switch( szRegisterName[1] )
@@ -213,7 +219,7 @@ int GetRegister( char* szRegisterName ) {
 		}
 		break;
 
-		// $t0, $t1, ..., $t9
+	// $t0, $t1, ..., $t9
 	case 't':
 	case 'T':
 		switch( szRegisterName[1] )
@@ -232,7 +238,7 @@ int GetRegister( char* szRegisterName ) {
 		}
 		break;
 
-		// $s0, $s1, ..., $sp
+	// $s0, $s1, ..., $sp
 	case 's':
 	case 'S':
 		switch( szRegisterName[1] )
@@ -251,7 +257,7 @@ int GetRegister( char* szRegisterName ) {
 		}
 		break;
 
-		// $k0, $k1
+	// $k0, $k1
 	case 'k':
 	case 'K':
 		switch( szRegisterName[1] )
@@ -262,15 +268,15 @@ int GetRegister( char* szRegisterName ) {
 		}
 		break;
 
-		// $gp
+	// $gp
 	case 'g':
 	case 'G':	iRet = 28;	break;
 
-		// $fp
+	// $fp
 	case 'f':
 	case 'F':	iRet = 30;	break;
 
-		// $ra
+	// $ra
 	case 'r':
 	case 'R':	iRet = 31;	break;
 
