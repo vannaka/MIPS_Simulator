@@ -23,7 +23,7 @@ int main( int argc, char *argv[] )
 	
     if( argc < 3 )
     {
-        printf( "Error: You should provide code file.\nUsage: %s <Input file> <Output file> \n\n",  argv[0] );
+        printf( "Error: You should provide input and output files.\nUsage: %s <Input file> <Output file> \n\n",  argv[0] );
         exit(1);
     }
 
