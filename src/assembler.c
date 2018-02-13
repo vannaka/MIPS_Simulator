@@ -15,7 +15,7 @@ int main( int argc, char *argv[] )
     FILE* fp_in, *fp_out;
     char* instr_str = NULL;
     size_t instr_str_size = 0;
-    char delim[5] = {' ', ',','$', '\n', '\0'};
+    char delim[] = {' ', ',','$', '\n', '\t', '\0'};
     char* token;
     mips_instr_t instr_info;
     uint32_t hexInstr;
@@ -67,11 +67,11 @@ int main( int argc, char *argv[] )
             
             if( iRet == -1 )
             {
-                printf("Invalid operand %s on line %d", token, line_num );
+                printf("\n[ERROR] Invalid operand %s on line %d\n", token, line_num );
                 exit(-1);
             }
             
-            printf(", %s", token);
+            printf(" %s", token);
             token = strtok( NULL, delim );
             
             i++;
@@ -230,6 +230,7 @@ int GetRegister( char* szRegisterName ) {
 		case '9':	iRet = 25;	break;
 		default:	iRet = -1;	break;
 		}
+		break;
 
 		// $s0, $s1, ..., $sp
 	case 's':
@@ -248,6 +249,7 @@ int GetRegister( char* szRegisterName ) {
 		case 'P':	iRet = 29;	break;
 		default:	iRet = -1;	break;
 		}
+		break;
 
 		// $k0, $k1
 	case 'k':
