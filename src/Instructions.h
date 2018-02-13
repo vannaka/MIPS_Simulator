@@ -13,6 +13,10 @@
 #define GET_IMMED(x)		( x & 0xFFFF )
 #define GET_ADDRESS(x)		( x & 0x3FFFFFF )
 
+#define intr_lookup_limit	0x2C
+#define opcode_0x01_limit   0x02
+#define opcode_0x00_limit   0x2B
+
 // project types
 typedef enum 
 {
