@@ -12,7 +12,7 @@
 /***************************************************************/
 int main( int argc, char *argv[] ) 
 {      
-    FILE* fp;
+    FILE* fp_in, *fp_out;
     char* instr_str = NULL;
     size_t instr_str_size = 0;
     char delim[5] = {' ', ',','$', '\n', '\0'};
@@ -21,22 +21,30 @@ int main( int argc, char *argv[] )
     uint32_t hexInstr;
     int iRet = 0, i = 0, line_num = 1;
 	
-    if( argc < 2 ) 
+    if( argc < 3 )
     {
-        printf( "Error: You should provide code file.\nUsage: %s <input program> \n\n",  argv[0] );
+        printf( "Error: You should provide code file.\nUsage: %s <Input file> <Output file> \n\n",  argv[0] );
         exit(1);
     }
 
-    /* Open program file. */
-    fp = fopen( argv[1], "r" );
-    if( fp == NULL )
+    // Open input file
+	fp_in = fopen( argv[1], "r" );
+    if( fp_in == NULL )
     {
-        printf( "Error: Can't open code file %s\n", argv[1] );
+        printf( "\nError: Can't open input file %s\n", argv[1] );
         exit(-1);
     }
+
+	// Open output file
+	fp_out = fopen( argv[2], "w" );
+	if( fp_out == NULL )
+	{
+		printf( "\nError: Can't create output file %s\n", argv[2] );
+		exit( -1 );
+	}
     
     // grab one line at a time
-    while( getline( &instr_str, &instr_str_size, fp ) != EOF )
+    while( getline( &instr_str, &instr_str_size, fp_in ) != EOF )
     {     
         hexInstr = 0;
         i = 0;
@@ -69,13 +77,17 @@ int main( int argc, char *argv[] )
             i++;
         }
         
-        printf(" [%08x]", hexInstr );
+		// save instruction to file
+		fprintf( fp_out, "%08x\n", hexInstr );
+        printf(" \t[%08x]", hexInstr );
         
         line_num++;
     }
     
-    printf("\n");	
-    
+    printf("\n");
+
+	fclose( fp_in );
+	fclose( fp_out );
     
 	return 0;
 }
