@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <ctype.h>
 
 #include "assembler.h"
 #include "Instructions.h"
@@ -14,36 +15,63 @@ int main( int argc, char *argv[] )
     FILE* fp;
     char* instr_str = NULL;
     size_t instr_str_size = 0;
-    char delim[] = {' ', '$', '\n', '\0'};
+    char delim[5] = {' ', ',','$', '\n', '\0'};
     char* token;
+    mips_instr_t instr_info;
+    uint32_t hexInstr;
+    int iRet = 0, i = 0, line_num = 1;
 	
-	if( argc < 2 ) 
-	{
-		printf( "Error: You should provide input file.\nUsage: %s <input program> \n\n",  argv[0] );
-		exit(1);
-	}
+    if( argc < 2 ) 
+    {
+        printf( "Error: You should provide code file.\nUsage: %s <input program> \n\n",  argv[0] );
+        exit(1);
+    }
 
-	/* Open program file. */
-	fp = fopen( argv[1], "r" );
-	if( fp == NULL )
-	{
-		printf( "Error: Can't open code file %s\n", argv[1] );
-		exit(-1);
-	}
-	
-	while( getline( &instr_str, &instr_str_size, fp ) != EOF )
-    {        
+    /* Open program file. */
+    fp = fopen( argv[1], "r" );
+    if( fp == NULL )
+    {
+        printf( "Error: Can't open code file %s\n", argv[1] );
+        exit(-1);
+    }
+    
+    // grab one line at a time
+    while( getline( &instr_str, &instr_str_size, fp ) != EOF )
+    {     
+        hexInstr = 0;
+        i = 0;
+        
+        // get the opcode
         token = strtok( instr_str, delim );
+        instr_info = assem_decode_opcode( token );
+        
+        // set the op and funct codes in the instruction
+        SET_OPCODE(hexInstr, instr_info.opcode);
+        SET_FUNCTCODE(hexInstr, instr_info.funct_code);
+        
+        printf("\n%s", instr_info.name);
     
-        printf("\nOPCODE: %s", token);
-    
-    
+        // get the operands
         token = strtok( NULL, delim );
-        while( token != NULL )
+        while( token != NULL && i < 3 && instr_info.skeleton[i] != 0 )
         {
-            printf("\nOPERAND: %s", token);
+            iRet = assem_operand_decode( instr_info.skeleton[i], token, &hexInstr );
+            
+            if( iRet == -1 )
+            {
+                printf("Invalid operand %s on line %d", token, line_num );
+                exit(-1);
+            }
+            
+            printf(", %s", token);
             token = strtok( NULL, delim );
+            
+            i++;
         }
+        
+        printf(" [%08x]", hexInstr );
+        
+        line_num++;
     }
     
     printf("\n");	
@@ -118,18 +146,22 @@ mips_instr_t assem_decode_opcode( char* str )
 }
 
 
-void assem_operand_decode( inst_op_type_t op_type, char* szRegisterName, uint32_t* pHexInstruction ) {
 
+int assem_operand_decode( inst_op_type_t op_type, char* szRegisterName, uint32_t* pHexInstruction ) {
+
+	int iTemp = 0;
 	switch( op_type )
 	{
-	case RS:	*pHexInstruction |= ( GetRegister( szRegisterName ) << 21 );	break;
-	case RT:	*pHexInstruction |= ( GetRegister( szRegisterName ) << 16 );	break;
-	case RD:	*pHexInstruction |= ( GetRegister( szRegisterName ) << 11 );	break;
-	case SA:	*pHexInstruction |= ( (int)strtol( szRegisterName, NULL, 16 ) << 6 );	break;
-	case IMMED:	// uses same step below
-	case ADDRESS:	*pHexInstruction |= ( (int)strtol( szRegisterName, NULL, 16 ) );		break;
+	case RS:	if((iTemp = GetRegister( szRegisterName )) < 0) return -1; *pHexInstruction |= ( iTemp << 21 );	break;
+	case RT:	if((iTemp = GetRegister( szRegisterName )) < 0) return -1; *pHexInstruction |= ( iTemp << 16 );	break;
+	case RD:	if((iTemp = GetRegister( szRegisterName )) < 0) return -1; *pHexInstruction |= ( iTemp << 11 );	break;
+	case SA:	*pHexInstruction |= ( 0x1F & ( strtol( szRegisterName, NULL, 16 ) << 6 ) );	break;
+	case IMMED:	*pHexInstruction |= ( 0xFFFF & strtol( szRegisterName, NULL, 16 ) );		break;
+	case ADDRESS:	*pHexInstruction |= ( 0x3FFFFFF & strtol( szRegisterName, NULL, 16 ) );		break;
 	default:	break;
 	}
+
+	return 0; //Return 0 upon success
 }
 
 

@@ -12,7 +12,7 @@ ASM_OBJS = assembler.o $(SHARED_OBJS)
 sim-mips: $(SIM_OBJS)
 	$(CC_GCC) -o sim-mips $(SIM_OBJS) $(CFLAGS)
 
-ass-mips: $(ASM_OBJS)
+asm-mips: $(ASM_OBJS)
 	$(CC_GCC) -o asm-mips $(ASM_OBJS) $(CFLAGS)
 
 clean:
