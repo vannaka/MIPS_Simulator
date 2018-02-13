@@ -63,7 +63,7 @@ int main( int argc, char *argv[] )
 		// check for valid opcode
 		if( instr_info.type == INV_TYPE )
 		{
-			printf( "\n[ERROR] Invalid opcode %s on line %d\n", token, line_num );
+			printf( "\n\x1b[91m[ERROR]\x1b[0m Invalid opcode %s on line %d\n", token, line_num );
 			remove( argv[2] );
 			exit( -1 );
 		}
@@ -80,7 +80,7 @@ int main( int argc, char *argv[] )
             
             if( iRet == -1 )
             {
-                printf("\n[ERROR] Invalid operand %s on line %d\n", token, line_num );
+                printf("\n\x1b[91m[ERROR]\x1b[0m Invalid operand %s on line %d\n", token, line_num );
 				remove( argv[2] );
                 exit(-1);
             }
