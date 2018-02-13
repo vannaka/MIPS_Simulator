@@ -655,7 +655,7 @@ void instr_handler_BEQ()
 	//get registers and immediate from instr
 	uint8_t rs = GET_RS( instr );
 	uint8_t rt = GET_RT( instr );
-	uint16_t immed = GET_IMMED( instr );
+	int16_t immed = GET_IMMED( instr );
 
 	uint32_t rs_val = CURRENT_STATE.REGS[rs];
 	uint32_t rt_val = CURRENT_STATE.REGS[rt];
@@ -682,7 +682,7 @@ void instr_handler_BNE()
 	//get registers and immediate from instr
 	uint8_t rs = GET_RS( instr );
 	uint8_t rt = GET_RT( instr );
-	uint16_t immed = GET_IMMED( instr );
+	int16_t immed = GET_IMMED( instr );
 
 	uint32_t rs_val = CURRENT_STATE.REGS[rs];
 	uint32_t rt_val = CURRENT_STATE.REGS[rt];
@@ -706,7 +706,7 @@ void instr_handler_BLEZ()
 
 	//get registers and immediate from instr
 	uint8_t rs = GET_RS( instr );
-	uint16_t immed = GET_IMMED( instr );
+	int16_t immed = GET_IMMED( instr );
 
 	uint32_t rs_val = CURRENT_STATE.REGS[rs];
 
@@ -731,7 +731,7 @@ void instr_handler_BGTZ()
 
 	//get registers and immediate from instr
 	uint8_t rs = GET_RS( instr );
-	uint16_t immed = GET_IMMED( instr );
+	int16_t immed = GET_IMMED( instr );
 
 	uint32_t rs_val = CURRENT_STATE.REGS[rs];
 
