@@ -7,7 +7,7 @@
 
 mips_instr_t opcode_0x00_table[0x2A + 1] =
 {
-			// Name			type	OCode	FCode	Makeup			FPtr	                SubTable
+			// Name			type	OCode	FCode	Makeup			FPtr	SubTable
 	[0x00] = { "SLL",		R_TYPE, 0x00,	0x00,	{RD, RT, SA},	&instr_handler_SLL,		NULL },
 	[0x02] = { "SRL",		R_TYPE, 0x00,	0x02,	{RD, RT, SA},	&instr_handler_SRL,		NULL },
 	[0x03] = { "SRA",		R_TYPE, 0x00,	0x03,	{RD, RT, SA},	&instr_handler_SRA,		NULL },
@@ -246,14 +246,21 @@ void instr_handler_JALR()
 void instr_handler_SYSCALL()
 {
 	int32_t v0_val;
+	int32_t a0_val;
 
 	v0_val = CURRENT_STATE.REGS[2];
-
+	a0_val = CURRENT_STATE.REGS[4];
 	switch( v0_val )
 	{
+	// print integer
+	case 0x01:
+		printf("%d\n", a0_val);
+		NEXT_STATE.PC += 4;
+		break;
 	// exit program
 	case 0x0A:
 		RUN_FLAG = 0;
+		break;
 	default:
 		return;
 	}
@@ -596,7 +603,11 @@ void instr_handler_BLTZ()
 
 	if( CURRENT_STATE.REGS[rs] < 0x0 )
 	{
-		NEXT_STATE.PC = NEXT_STATE.PC + 4 + immed;
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
 	}
 }
 
@@ -609,7 +620,11 @@ void instr_handler_BGEZ()
 
 	if( CURRENT_STATE.REGS[rs] >= 0x0 )
 	{
-		NEXT_STATE.PC = NEXT_STATE.PC + 4 + immed;
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
 	}
 }
 
@@ -648,9 +663,12 @@ void instr_handler_BEQ()
 	//if equal, branch
 	if( rs_val == rt_val )
 	{
-		//pc = pc + 4 + branch adder
-		NEXT_STATE.PC = NEXT_STATE.PC + immed;
-	}//else do nothing
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
+	}
 
 }
 
@@ -671,9 +689,12 @@ void instr_handler_BNE()
 
 	if( rs_val != rt_val )
 	{
-		//pc = pc + 4 + branch adder
-		NEXT_STATE.PC = NEXT_STATE.PC + immed;
-	}//else do nothing
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
+	}
 }
 
 
@@ -692,9 +713,12 @@ void instr_handler_BLEZ()
 	//if less than equal to zero, branch
 	if( rs_val <= 0x0 )
 	{
-		//pc = pc + 4 + branch adder
-		NEXT_STATE.PC = NEXT_STATE.PC + 4 + immed;
-	}//else do nothing
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
+	}
 
 }
 
@@ -714,9 +738,12 @@ void instr_handler_BGTZ()
 	//if greater than equal to zero, branch
 	if( rs_val >= 0x0 )
 	{
-		//pc = pc + 4 + branch adder
-		NEXT_STATE.PC = NEXT_STATE.PC + 4 + immed;
-	}//else do nothing
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
+	}
 }
 
 
