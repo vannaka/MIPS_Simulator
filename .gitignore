@@ -54,3 +54,9 @@ dkms.conf
 src/mu-mips
 
 src/ass-mips
+
+src/sim-mips
+
+src/asm-mips
+
+inputs/asm1\.in
