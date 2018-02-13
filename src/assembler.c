@@ -53,6 +53,71 @@ int main( int argc, char *argv[] )
 }
 
 
+mips_instr_t assem_decode_opcode( char* str )
+{
+	int i = 0x0;
+	int ret = -1;
+	mips_instr_t instr_info;
+
+	//convert the name to all caps
+	char *s = str;
+	while( *s )
+	{
+		*s = toupper( (unsigned char)*s );
+		s++;
+	}
+
+	//check the lookup table first
+	while( i < intr_lookup_limit )
+	{
+		//compare the given instruction name to the name at entry i
+		ret = strcmp( str, mips_instr_lookup[i].name );
+
+		//check if the names match
+		if( ret == 0 )
+			return ( instr_info = mips_instr_lookup[i] );       //return instr_info structure
+		else
+			i++;      //bump counter
+	}
+
+	//reset counter
+	i = 0;
+
+	//check the table for opcodes of 0     
+	while( i < opcode_0x00_limit )
+	{
+		//compare the given instruction name to the name at entry i
+		ret = strcmp( str, opcode_0x00_table[i].name );
+
+		//check if the names match
+		if( ret == 0 )
+			return ( instr_info = opcode_0x00_table[i] );       //return instr_info structure
+		else
+			i++; //bump counter
+	}
+
+	//reset counter
+	i = 0;
+
+	//check table for opcodes of 1
+	while( i < opcode_0x01_limit )
+	{
+
+		//compare the given instruction name to the name at entry i
+		ret = strcmp( str, opcode_0x01_table[i].name );
+
+		//check if the names match
+		if( ret == 0 )
+			return ( instr_info = opcode_0x01_table[i] );       //return instr_info structure
+		else
+			i++;      //bump counter
+	}
+
+	//need a null return case
+
+}
+
+
 void assem_operand_decode( inst_op_type_t op_type, char* szRegisterName, uint32_t* pHexInstruction ) {
 
 	switch( op_type )
