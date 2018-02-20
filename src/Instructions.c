@@ -246,14 +246,21 @@ void instr_handler_JALR()
 void instr_handler_SYSCALL()
 {
 	int32_t v0_val;
+	int32_t a0_val;
 
 	v0_val = CURRENT_STATE.REGS[2];
-
+	a0_val = CURRENT_STATE.REGS[4];
 	switch( v0_val )
 	{
+	// print integer
+	case 0x01:
+		printf("%d\n", a0_val);
+		NEXT_STATE.PC += 4;
+		break;
 	// exit program
 	case 0x0A:
-		exit( 0 );
+		RUN_FLAG = 0;
+		break;
 	default:
 		return;
 	}
@@ -596,7 +603,11 @@ void instr_handler_BLTZ()
 
 	if( CURRENT_STATE.REGS[rs] < 0x0 )
 	{
-		NEXT_STATE.PC = NEXT_STATE.PC + 4 + immed;
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
 	}
 }
 
@@ -609,7 +620,11 @@ void instr_handler_BGEZ()
 
 	if( CURRENT_STATE.REGS[rs] >= 0x0 )
 	{
-		NEXT_STATE.PC = NEXT_STATE.PC + 4 + immed;
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
 	}
 }
 
@@ -640,7 +655,7 @@ void instr_handler_BEQ()
 	//get registers and immediate from instr
 	uint8_t rs = GET_RS( instr );
 	uint8_t rt = GET_RT( instr );
-	uint16_t immed = GET_IMMED( instr );
+	int16_t immed = GET_IMMED( instr );
 
 	uint32_t rs_val = CURRENT_STATE.REGS[rs];
 	uint32_t rt_val = CURRENT_STATE.REGS[rt];
@@ -648,9 +663,12 @@ void instr_handler_BEQ()
 	//if equal, branch
 	if( rs_val == rt_val )
 	{
-		//pc = pc + 4 + branch adder
-		NEXT_STATE.PC = NEXT_STATE.PC + immed;
-	}//else do nothing
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
+	}
 
 }
 
@@ -664,16 +682,19 @@ void instr_handler_BNE()
 	//get registers and immediate from instr
 	uint8_t rs = GET_RS( instr );
 	uint8_t rt = GET_RT( instr );
-	uint16_t immed = GET_IMMED( instr );
+	int16_t immed = GET_IMMED( instr );
 
 	uint32_t rs_val = CURRENT_STATE.REGS[rs];
 	uint32_t rt_val = CURRENT_STATE.REGS[rt];
 
 	if( rs_val != rt_val )
 	{
-		//pc = pc + 4 + branch adder
-		NEXT_STATE.PC = NEXT_STATE.PC + immed;
-	}//else do nothing
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
+	}
 }
 
 
@@ -685,16 +706,19 @@ void instr_handler_BLEZ()
 
 	//get registers and immediate from instr
 	uint8_t rs = GET_RS( instr );
-	uint16_t immed = GET_IMMED( instr );
+	int16_t immed = GET_IMMED( instr );
 
 	uint32_t rs_val = CURRENT_STATE.REGS[rs];
 
 	//if less than equal to zero, branch
 	if( rs_val <= 0x0 )
 	{
-		//pc = pc + 4 + branch adder
-		NEXT_STATE.PC = NEXT_STATE.PC + 4 + immed;
-	}//else do nothing
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
+	}
 
 }
 
@@ -707,16 +731,19 @@ void instr_handler_BGTZ()
 
 	//get registers and immediate from instr
 	uint8_t rs = GET_RS( instr );
-	uint16_t immed = GET_IMMED( instr );
+	int16_t immed = GET_IMMED( instr );
 
 	uint32_t rs_val = CURRENT_STATE.REGS[rs];
 
 	//if greater than equal to zero, branch
 	if( rs_val >= 0x0 )
 	{
-		//pc = pc + 4 + branch adder
-		NEXT_STATE.PC = NEXT_STATE.PC + 4 + immed;
-	}//else do nothing
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+	}
+	else
+	{
+		NEXT_STATE.PC += 4;
+	}
 }
 
 

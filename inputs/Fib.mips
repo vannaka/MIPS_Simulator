@@ -1,0 +1,24 @@
+
+// Calc fibonacci numbers
+addiu $s0, $zero, A		// Fibonacci number to calculate
+addiu $s1, $zero, 0		// Store Sum
+addiu $s2, $zero, 0		// Store Prev
+addiu $s3, $zero, 0		// Store Second Prev
+addiu $s4, $zero, 0		// Store counter
+slt $t0, $s4, $s0		// if(counter < Number) 
+beq $t0, $zero, 0x0028	// branch to end of for loop if counter >= Number
+slti $t1, $s4, 2		// if(counter < 2)
+beq $t1, $zero, 0x000C	// branch to end of if
+addiu $s1, $zero, 1		// Store Sum
+beq $t1, $t1, 0x0008	// branch to end of else
+add $s1, $s2, $s3		// Sum = Prev + Second Prev
+addiu $s3, $s2, 0		// Store Second Prev
+addiu $s2, $s1, 0		// Store Prev
+addiu $s4, $s4, 0x1		// Increment Counter
+j 0x100005				// Jump to beginning of for loop
+addiu $a0, $s1, 0		// Set integer to be printed
+addiu $v0 $zero 0x0001	// Print Integer
+SYSCALL					// Print Integer
+addiu $v0 $zero 0x000A	// End Program
+SYSCALL					// End Program
+	
