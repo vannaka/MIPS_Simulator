@@ -2,6 +2,16 @@
 #define PIPELINE_H
 
 #include "Instructions.h"
+#include "mu-mips.h"
+
+// project types
+typedef enum 
+{
+	DEFAULT_TYPE = 0,
+	LOAD_TYPE, 
+	STORE_TYPE, 
+	REGISTER_TYPE,
+} CONTROL_TYPE;
 
 typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t PC;
@@ -11,13 +21,13 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	int32_t IMMED;
 	uint32_t ALUOutput;
 	uint32_t LMD;
-        mips_instr_t instr_data;
-	
+	mips_instr_t instr_data;
+	CONTROL_TYPE Control;
 } CPU_Pipeline_Reg;
 
 
 /***************************************************************/
-/* Pipeline Registers.                                         */                                                                                                  */
+/* Pipeline Registers.                                         */
 /***************************************************************/
 CPU_Pipeline_Reg IF_ID;
 CPU_Pipeline_Reg ID_EX;
