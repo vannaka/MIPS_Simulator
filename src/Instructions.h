@@ -27,7 +27,7 @@ typedef enum
 	R_TYPE, 
 	I_TYPE, 
 	J_TYPE,
-	M_TYPE
+	M_TYPE     // subtable
 } inst_type_t;
 
 typedef enum
