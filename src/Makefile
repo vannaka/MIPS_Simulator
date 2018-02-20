@@ -1,6 +1,17 @@
-mu-mips: mu-mips.c
-	gcc -Wall -g -O2 $^ -o $@
+CC_GCC = gcc
 
-.PHONY: clean
+CFLAGS = -Wall -g -O2 
+
+OBJS = memory.o Instructions.o mu-mips.o
+ 
+OBJ_LINK_LIST:= $(OBJS)
+
+%.o: %.c
+	$(CC_GCC) $(CFLAGS) -o $@ -c $< 
+
+mu-mips: $(OBJ_LINK_LIST)
+	$(CC_GCC) -o mu-mips $(OBJ_LINK_LIST) $(CFLAGS)
+
 clean:
-	rm -rf *.o *~ mu-mips
+	rm -f mu-mips $(OBJ_LINK_LIST)
+
