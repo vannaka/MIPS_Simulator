@@ -7,7 +7,7 @@
 
 mips_instr_t opcode_0x00_table[0x2A + 1] =
 {
-			// Name			type	OCode	FCode	Makeup			FPtr	SubTable
+			// Name			type	OCode	FCode	Makeup			FPtr	                SubTable
 	[0x00] = { "SLL",		R_TYPE, 0x00,	0x00,	{RD, RT, SA},	&instr_handler_SLL,		NULL },
 	[0x02] = { "SRL",		R_TYPE, 0x00,	0x02,	{RD, RT, SA},	&instr_handler_SRL,		NULL },
 	[0x03] = { "SRA",		R_TYPE, 0x00,	0x03,	{RD, RT, SA},	&instr_handler_SRA,		NULL },
