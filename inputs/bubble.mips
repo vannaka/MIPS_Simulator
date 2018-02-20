@@ -1,0 +1,66 @@
+lui $v1, 1001  		//set $v1 = 10010000 begining of data segment
+
+addiu $a0, $zero, 0x5   //load a0 with 5
+sw $a0 , $zero, $v1 	//store 5 in location 10010000
+
+addiu $a0, $zero, 0x3   //load a0 with 3
+sw $a0 , 0x4, $v1 	//store value in $a0 into memory location $v1 + immed
+
+addiu $a0, $zero, 0x6   //load a0 with 6
+sw $a0 , 0x8, $v1 	//store value in $a0 into memory location $v1 + immed
+
+addiu $a0, $zero, 0x8   //load a0 with 8
+sw $a0 , 0xC, $v1 	//store value in $a0 into memory location $v1 + immed
+
+addiu $a0, $zero, 0x9   //load a0 with 9
+sw $a0 , 0x10, $v1 	//store value in $a0 into memory location $v1 + immed
+
+addiu $a0, $zero, 0x1   //load a0 with 1
+sw $a0 , 0x14, $v1 	//store value in $a0 into memory location $v1 + immed
+
+addiu $a0, $zero, 0x4   //load a0 with 4
+sw $a0 , 0x18, $v1 	//store value in $a0 into memory location $v1 + immed
+
+addiu $a0, $zero, 0x7   //load a0 with 7
+sw $a0 , 0x1C, $v1 	//store value in $a0 into memory location $v1 + immed
+
+addiu $a0, $zero, 0x2   //load a0 with 2
+sw $a0 , 0x20, $v1 	//store value in $a0 into memory location $v1 + immed
+
+addiu $a0, $zero, 0x10  //load a0 with 10
+sw $a0 , 0x24, $v1 	//store value in $a0 into memory location $v1 + immed
+
+
+addiu $s2, $zero, 0xA		//$s2; number = 10
+addiu $s3, $zero, 0x9
+add $t3, $zero, $v1 		//index for $v1
+add $t4, $zero, $v1
+
+addiu $s0, $zero, 0x0 		//$s0; i = 0
+slt $t0, $s0, $s2		// if(counter < Number) 
+beq $t0, $zero, 0x0048		// branch to end of for loop if counter >= Number
+
+add $t3, $zero, $t4 		// Set memory for this loop
+addiu $s1, $zero, 0x0  		//$s1; j = 0 
+add $s4, $s1, $s0
+slt $t1, $s4, $s3		// if(counter < Number) 
+beq $t1, $zero, 0x0028		// branch to end of for loop if counter >= Number
+
+lw $s5, 0x0, $t3	 	// x
+lw $s6, 0x4, $t3		// y
+slt $t2, $s6, $s5		// if(y < x) 
+beq $t2, $zero, 0x000C		// branch to end of if
+
+sw $s5, 0x4, $t3
+sw $s6, 0x0, $t3	 			
+
+addiu $t3, $t3, 0x4		// Increment Memory
+addiu $s1, $s1, 0x1		// Increment Counter
+j 0x10001e			// Jump to beginning of for loop
+
+addiu $t4, $t4, 0x0		// Increment Memory
+addiu $s0, $s0, 0x1		// Increment Counter
+j 0x10001a			// Jump to beginning of for loop
+
+addiu $v0 $zero 0x000A		// End Program
+SYSCALL				// End Program
