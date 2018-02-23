@@ -688,24 +688,11 @@ void instr_handler_BGTZ()
 
 
 //add a registers value and an immediate - signed
-void instr_handler_ADDI()
+void instr_handler_ADDI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	uint8_t rt = GET_RT( instr );
-	int16_t immed = GET_IMMED( instr );
-
-	//get the value from register rs - signed
-	int32_t rs_val = CURRENT_STATE.REGS[rs];
-
-	//add the immediate value to the value in register rs and place it in rt - signed
-	NEXT_STATE.REGS[rt] = rs_val + immed;
-
-	//bump the program counter
-	NEXT_STATE.PC += 4;
+	// Add Register Contents A with immediate - signed
+	(*EX_MEM).ALUOutput = (int32_t)((int32_t)(*ID_EX).A + (int32_t)(*ID_EX).IMMED);
+	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
 
@@ -720,71 +707,29 @@ void instr_handler_ADDIU(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 
 
 //set less then immediate - signed
-void instr_handler_SLTI()
+void instr_handler_SLTI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	uint8_t rt = GET_RT( instr );
-	int16_t immed = GET_IMMED( instr );
-
-	//get the value from register rs - signed
-	int32_t rs_val = CURRENT_STATE.REGS[rs];
-
-	//if the value in rs is less then immediate, rt is set to 1, otherwise 0
-	if( rs_val < immed )
-		NEXT_STATE.REGS[rt] = 0x1;
-	else
-		NEXT_STATE.REGS[rt] = 0x0;
-
-	//bump the program counter
-	NEXT_STATE.PC += 4;
+	// Set output to 1 if Register Contents A is less than immediate
+	(*EX_MEM).ALUOutput = ((*ID_EX).A < (*ID_EX).IMMED) ? 0x1 : 0x0;
+	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
 
 //and immediate
-void instr_handler_ANDI()
+void instr_handler_ANDI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	uint8_t rt = GET_RT( instr );
-	uint16_t immed = GET_IMMED( instr );
-
-	//get the value from register rs
-	uint32_t rs_val = CURRENT_STATE.REGS[rs];
-
-	//the value in rs is anded with the zer0 extended immediate and stored in rt
-	NEXT_STATE.REGS[rt] = rs_val & immed;
-
-	//bump the program counter
-	NEXT_STATE.PC += 4;
+	// AND Register Contents A with immediate
+	(*EX_MEM).ALUOutput = (*ID_EX).A & (*ID_EX).IMMED;
+	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
 
 //or immediate
-void instr_handler_ORI()
+void instr_handler_ORI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	uint8_t rt = GET_RT( instr );
-	uint16_t immed = GET_IMMED( instr );
-
-	//get the value from register rs
-	uint32_t rs_val = CURRENT_STATE.REGS[rs];
-
-	//the value in rs is ored with the zer0 extended immediate and stored in rt
-	NEXT_STATE.REGS[rt] = rs_val | immed;
-
-	//bump the program counter
-	NEXT_STATE.PC += 4;
+	// OR Register Contents A with immediate
+	(*EX_MEM).ALUOutput = (*ID_EX).A | (*ID_EX).IMMED;
+	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
 
@@ -809,52 +754,22 @@ void instr_handler_LUI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 
 
 //load byte
-void instr_handler_LB()
+void instr_handler_LB(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	uint8_t rt = GET_RT( instr );
-	int16_t immed = GET_IMMED( instr );
-
-	//get the value from rs and sign extend it
-	int32_t rs_val = CURRENT_STATE.REGS[rs];
-
-	//add the immediate and value from rs to generate a virtual address
-	int32_t address = rs_val + immed;
-
-	//rt register gets 1 byte from address, bit masked by 0xFF
-	NEXT_STATE.REGS[rt] = 0xFF & mem_read_32( address );
-
-	//bump the program counter
-	NEXT_STATE.PC += 4;
+	// Set address to Register Contents A + immediate
+	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
+	(*EX_MEM).Control = LOAD_TYPE;
+	(*EX_MEM).num_bytes = BYTE;
 }
 
 
 //load halfword
-void instr_handler_LH()
+void instr_handler_LH(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	uint8_t rt = GET_RT( instr );
-	int16_t immed = GET_IMMED( instr );
-
-	//get the value from rs and sign extend it
-	int32_t rs_val = CURRENT_STATE.REGS[rs];
-
-	//add the immediate and value from rs to generate a virtual address
-	int32_t address = rs_val + immed;
-
-	//rt register gets 2 bytes (halfword) from address, bit masked by 0xFFFF
-	NEXT_STATE.REGS[rt] = 0xFFFF & mem_read_32( address );
-
-	//bump the program counter
-	NEXT_STATE.PC += 4;
+	// Set address to Register Contents A + immediate
+	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
+	(*EX_MEM).Control = LOAD_TYPE;
+	(*EX_MEM).num_bytes = HALF_WORD;
 }
 
 
@@ -864,65 +779,27 @@ void instr_handler_LW(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	// Set address to Register Contents A + immediate
 	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
 	(*EX_MEM).Control = LOAD_TYPE;
-
+	(*EX_MEM).num_bytes = WORD;
 }
 
 
 //store byte
-void instr_handler_SB()
+void instr_handler_SB(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	uint8_t rt = GET_RT( instr );
-	int16_t immed = GET_IMMED( instr );
-
-	//get the value from rs,rt and sign extend it
-	int32_t rs_val = CURRENT_STATE.REGS[rs];
-	uint32_t rt_val = CURRENT_STATE.REGS[rt];
-
-	//add the immediate and value from rs to generate a virtual address
-	int32_t address = rs_val + immed;
-
-	//get the least significant byte from rt
-	uint8_t value = 0xFF & rt_val;
-
-	//store the value to the calculated address
-	mem_write_32( address, value );
-
-	//bump the program counter
-	NEXT_STATE.PC += 4;
+	// Set address to Register Contents A + immediate
+	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
+	(*EX_MEM).Control = STORE_TYPE;
+	(*EX_MEM).num_bytes = BYTE;
 }
 
 
 //store halfword
-void instr_handler_SH()
+void instr_handler_SH(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	uint8_t rt = GET_RT( instr );
-	int16_t immed = GET_IMMED( instr );
-
-	//get the value from rs,rt and sign extend it
-	int32_t rs_val = CURRENT_STATE.REGS[rs];
-	uint32_t rt_val = CURRENT_STATE.REGS[rt];
-
-	//add the immediate and value from rs to generate a virtual address
-	int32_t address = rs_val + immed;
-
-	//get the least significant halfword from rt
-	uint8_t value = 0xFFFF & rt_val;
-
-	//store the value to the calculated address
-	mem_write_32( address, value );
-
-	//bump the program counter
-	NEXT_STATE.PC += 4;
+	// Set address to Register Contents A + immediate
+	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
+	(*EX_MEM).Control = STORE_TYPE;
+	(*EX_MEM).num_bytes = HALF_WORD;
 }
 
 
@@ -932,5 +809,5 @@ void instr_handler_SW(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	// Set address to Register Contents A + immediate
 	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
 	(*EX_MEM).Control = STORE_TYPE;
-
+	(*EX_MEM).num_bytes = WORD;
 }

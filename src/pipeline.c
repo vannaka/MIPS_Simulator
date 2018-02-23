@@ -69,13 +69,27 @@ void MEM()
 		MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 		MEM_WB.Control = EX_MEM.Control;
 		MEM_WB.instr_data = EX_MEM.instr_data;
-	
+
 		// Write new values dependent upon control type
 		switch(EX_MEM.Control){
-			case LOAD_TYPE: 	MEM_WB.LMD = mem_read_32(EX_MEM.ALUOutput);	break;
-			case STORE_TYPE: 	mem_write_32(EX_MEM.ALUOutput, EX_MEM.B); 	break;
-			case REGISTER_TYPE:	/*	Do nothing	*/						 	break;
-			default:														break;
+			case LOAD_TYPE: 	
+				switch(MEM_WB.num_bytes){					
+					case BYTE: 		MEM_WB.LMD = 0x00FF & mem_read_32(EX_MEM.ALUOutput);	break;
+					case HALF_WORD: MEM_WB.LMD = 0xFFFF & mem_read_32(EX_MEM.ALUOutput);	break;
+					case WORD:		MEM_WB.LMD = mem_read_32(EX_MEM.ALUOutput);				break;
+					default: 		/*	Do nothing	*/										break;
+				}
+				break;
+			case STORE_TYPE: 	
+				switch(EX_MEM.num_bytes){
+					case BYTE:		mem_write_32(EX_MEM.ALUOutput, 0x00FF & EX_MEM.B); 		break;
+					case HALF_WORD: mem_write_32(EX_MEM.ALUOutput, 0xFFFF & EX_MEM.B); 		break;			
+					case WORD: 		mem_write_32(EX_MEM.ALUOutput, EX_MEM.B); 				break;
+					default: 		/*	Do nothing	*/										break;				
+				}
+				break;
+			case REGISTER_TYPE:	/*	Do nothing	*/	break;
+			default:			/*	Do nothing	*/	break;
 		}
 	}
 }
@@ -85,8 +99,8 @@ void WB()
 	if(MEM_WB.IR != 0) {
 		// Write new values dependent upon control type
 		switch(MEM_WB.Control){
-			case LOAD_TYPE: 		NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.LMD;	break;
-			case STORE_TYPE: 		/*	Do nothing	*/								 	break;
+			case LOAD_TYPE:			NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.LMD;			break;
+			case STORE_TYPE: 		/*	Do nothing	*/								 			break;
 			case REGISTER_TYPE: 
 				switch(MEM_WB.instr_data.type){
 					case R_TYPE: 	NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 	break;
@@ -94,7 +108,7 @@ void WB()
 					default:		/*	Do nothing	*/					 						break;
 				}
 				break;
-			default:														break;
+			default:				/*	Do nothing	*/	break;
 		}
 	}
 }

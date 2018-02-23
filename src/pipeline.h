@@ -7,11 +7,19 @@
 // project types
 typedef enum 
 {
-	DEFAULT_TYPE = 0,
+	DEFAULT_CONTROL_TYPE = 0,
 	LOAD_TYPE, 
 	STORE_TYPE, 
 	REGISTER_TYPE,
 } CONTROL_TYPE;
+
+typedef enum 
+{
+	DEFAULT_DATA_SIZE = 0,
+	BYTE = 1, 
+	HALF_WORD = 2, 
+	WORD = 4,
+} DATA_SIZE;
 
 typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t PC;
@@ -23,6 +31,7 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t LMD;
 	mips_instr_t instr_data;
 	CONTROL_TYPE Control;
+	DATA_SIZE num_bytes;	// For store/load specify 1, 2, or 4 bytes. Ex() changes this value and MEM() and WB() should use this
 } CPU_Pipeline_Reg;
 
 
