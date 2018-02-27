@@ -129,7 +129,7 @@ mips_instr_t mips_instr_decode( uint32_t instr )
 	{
 		instr_info = mips_instr_lookup[opcode];
 
-	}
+	}rt_val
 
 	return instr_info;
 }
@@ -352,8 +352,8 @@ void instr_handler_MTLO()
 void instr_handler_MULT()
 {
 	uint32_t instr;
-	int32_t rs_val, rd_val;
-	uint8_t rs, rd;
+	int32_t rs_val, rt_val;
+	uint8_t rs, rt;
 	int64_t result;
 
 	// Get instruction
@@ -361,12 +361,12 @@ void instr_handler_MULT()
 
 	// Get values
 	rs = GET_RS( instr );
-	rd = GET_RD( instr );
+	rt = GET_RT( instr );
 	rs_val = CURRENT_STATE.REGS[rs];
-	rd_val = CURRENT_STATE.REGS[rd];
+	rt_val = CURRENT_STATE.REGS[rt];
 
 	// multiply
-	result = rs_val * rd_val;
+	result = rs_val * rt_val;
 
 	// Save result
 	NEXT_STATE.HI = ( result >> 32 );
@@ -380,8 +380,8 @@ void instr_handler_MULT()
 void instr_handler_MULTU()
 {
 	uint32_t instr;
-	uint32_t rs_val, rd_val;
-	uint8_t rs, rd;
+	uint32_t rs_val, rt_val;
+	uint8_t rs, rt;
 	uint64_t result;
 
 	// Get instruction
@@ -389,12 +389,12 @@ void instr_handler_MULTU()
 
 	// Get values
 	rs = GET_RS( instr );
-	rd = GET_RD( instr );
+	rt = GET_RT( instr );
 	rs_val = CURRENT_STATE.REGS[rs];
-	rd_val = CURRENT_STATE.REGS[rd];
+	rt_val = CURRENT_STATE.REGS[rt];
 
 	// multiply
-	result = rs_val * rd_val;
+	result = rs_val * rt_val;
 
 	// Save result
 	NEXT_STATE.HI = ( result >> 32 );
