@@ -25,6 +25,7 @@ void help()
 	printf("high <val>\t-- set the HI register to <val>\n");
 	printf("low <val>\t-- set the LO register to <val>\n");
 	printf("print\t-- print the program loaded into memory\n");
+	printf("pipe\t-- print the pipeline buffers in memory\n");
 	printf("?\t-- display help menu\n");
 	printf("quit\t-- exit the simulator\n\n");
 	printf("------------------------------------------------------------------\n\n");
@@ -188,11 +189,14 @@ void handle_command()
 
 		case 'P':
 		case 'p':
-			print_program(); 
-			break;
-		case 'a':
-		case 'A':
-			show_pipeline();
+			if( buffer[1] == 'r' || buffer[1] == 'R' )
+			{
+				print_program();
+			}
+			else if( buffer[1] == 'i' || buffer[1] == 'I' )
+			{
+				show_pipeline();
+			}		 
 			break;
 		default:
 			printf( "Invalid Command.\n" );
