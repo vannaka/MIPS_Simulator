@@ -217,19 +217,10 @@ void instr_handler_SYSCALL()
 
 	v0_val = CURRENT_STATE.REGS[2];
 	a0_val = CURRENT_STATE.REGS[4];
-	switch( v0_val )
-	{
-	// print integer
-	case 0x01:
-		printf("%d\n", a0_val);
-		NEXT_STATE.PC += 4;
-		break;
-	// exit program
-	case 0x0A:
-		RUN_FLAG = 0;
-		break;
-	default:
-		return;
+	switch( v0_val ) {
+		case 0x01:	printf("%d\n", a0_val);		break;	// print integer
+		case 0x0A:	RUN_FLAG = 0;				break;	// exit program
+		default:								return;
 	}
 }
 
@@ -249,7 +240,7 @@ void instr_handler_MFHI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_MTHI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
     //set ALUOutput2 to rs
-    (*EX_MEM).ALUOutput2 = (int32_t)((int32_t)(*ID_EX).A;
+    (*EX_MEM).ALUOutput2 = (int32_t)((int32_t)(*ID_EX).A);
     //set type as special register
     (*EX_MEM).Control = SPECIAL_REGISTER_TYPE;
     
@@ -271,7 +262,7 @@ void instr_handler_MFLO(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_MTLO(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
     //set ALUOutput to rs
-	(*EX_MEM).ALUOutput = (int32_t)((int32_t)(*ID_EX).A;
+	(*EX_MEM).ALUOutput = (int32_t)((int32_t)(*ID_EX).A);
     //set type as special register
     (*EX_MEM).Control = SPECIAL_REGISTER_TYPE;
 
