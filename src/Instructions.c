@@ -146,7 +146,7 @@ void instr_handler_SLL( CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM )
 	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
-void instr_handler_SRL()
+void instr_handler_SRL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {  
     uint8_t sa;
     
@@ -158,7 +158,7 @@ void instr_handler_SRL()
 }
 
 
-void instr_handler_SRA()
+void instr_handler_SRA(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
     uint8_t sa;
     
@@ -346,7 +346,7 @@ void instr_handler_DIV(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 }
 
 
-void instr_handler_DIVU()
+void instr_handler_DIVU(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	// Divide Register Contents A by Register Contents B - unsigned
 	(*EX_MEM).ALUOutput 	= (*ID_EX).A / (*ID_EX).B;	// Low state
