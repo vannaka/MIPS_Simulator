@@ -11,6 +11,7 @@ typedef enum
 	LOAD_TYPE, 
 	STORE_TYPE, 
 	REGISTER_TYPE,
+	SPECIAL_REGISTER_TYPE
 } CONTROL_TYPE;
 
 typedef enum 
