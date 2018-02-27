@@ -28,6 +28,7 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t B;    // ALU input
 	int32_t IMMED;
 	uint32_t ALUOutput;
+        uint32_t ALUOutput2;    // Used for Multiply and Divide instrs
 	uint32_t LMD;
 	mips_instr_t instr_data;
 	CONTROL_TYPE Control;

@@ -36,6 +36,7 @@ void ID()
 		
 		// Write new values in struct
 		ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
+        
 		ID_EX.A = CURRENT_STATE.REGS[rs];
 		ID_EX.B = CURRENT_STATE.REGS[rt];
 		ID_EX.IMMED = (int32_t)immed;
@@ -54,6 +55,8 @@ void EX()
 	
 		// Write new value into ALUOutput
 		(*( EX_MEM.instr_data.funct ))( &ID_EX, &EX_MEM );
+        
+        // TODO: IF Branch take action
 	}
 }
 
@@ -78,7 +81,7 @@ void MEM()
 					case HALF_WORD: MEM_WB.LMD = 0xFFFF & mem_read_32(EX_MEM.ALUOutput);	break;
 					case WORD:		MEM_WB.LMD = mem_read_32(EX_MEM.ALUOutput);				break;
 					default: 		/*	Do nothing	*/										break;
-				}
+				}(*( EX_MEM.instr_data.funct ))( &ID_EX, &EX_MEM );
 				break;
 			case STORE_TYPE: 	
 				switch(EX_MEM.num_bytes){
