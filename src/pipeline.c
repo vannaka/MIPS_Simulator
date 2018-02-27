@@ -70,6 +70,7 @@ void MEM()
 		MEM_WB.B = EX_MEM.B;
 		MEM_WB.IMMED = EX_MEM.IMMED;
 		MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+		MEM_WB.ALUOutput2 = EX_MEM.ALUOutput2;
 		MEM_WB.Control = EX_MEM.Control;
 		MEM_WB.instr_data = EX_MEM.instr_data;
 
@@ -91,8 +92,9 @@ void MEM()
 					default: 		/*	Do nothing	*/										break;				
 				}
 				break;
-			case REGISTER_TYPE:	/*	Do nothing	*/	break;
-			default:			/*	Do nothing	*/	break;
+			case REGISTER_TYPE:			/*	Do nothing	*/	break;
+			case SPECIAL_REGISTER_TYPE:	/*	Do nothing	*/	break; 
+			default:					/*	Do nothing	*/	break;
 		}
 	}
 }
@@ -110,6 +112,10 @@ void WB()
 					case I_TYPE: 	NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.ALUOutput; 	break;
 					default:		/*	Do nothing	*/					 						break;
 				}
+				break;
+			case SPECIAL_REGISTER_TYPE:
+				NEXT_STATE.LO = MEM_WB.ALUOutput;
+				NEXT_STATE.HI = MEM_WB.ALUOutput2;
 				break;
 			default:				/*	Do nothing	*/	break;
 		}

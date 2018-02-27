@@ -316,117 +316,42 @@ void instr_handler_MTLO()
 }
 
 
-void instr_handler_MULT()
+void instr_handler_MULT(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr;
-	int32_t rs_val, rt_val;
-	uint8_t rs, rt;
-	int64_t result;
 
-	// Get instruction
-	instr = mem_read_32( CURRENT_STATE.PC );
-
-	// Get values
-	rs = GET_RS( instr );
-	rt = GET_RT( instr );
-	rs_val = CURRENT_STATE.REGS[rs];
-	rt_val = CURRENT_STATE.REGS[rt];
-
-	// multiply
-	result = rs_val * rt_val;
-
-	// Save result
-	NEXT_STATE.HI = ( result >> 32 );
-	NEXT_STATE.LO = ( result & 0xFFFFFFFF );
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+	// Multiply Register Contents A with Register Contents B - signed
+	int64_t Product = (int32_t)(*ID_EX).A * (int32_t)(*ID_EX).B;
+	(*EX_MEM).ALUOutput 	= (Product & 0xFFFFFFFF);	// Low state
+	(*EX_MEM).ALUOutput2 	= (Product >> 32);			// High state
+	(*EX_MEM).Control = SPECIAL_REGISTER_TYPE;
 }
 
 
-void instr_handler_MULTU()
+void instr_handler_MULTU(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr;
-	uint32_t rs_val, rt_val;
-	uint8_t rs, rt;
-	uint64_t result;
-
-	// Get instruction
-	instr = mem_read_32( CURRENT_STATE.PC );
-
-	// Get values
-	rs = GET_RS( instr );
-	rt = GET_RT( instr );
-	rs_val = CURRENT_STATE.REGS[rs];
-	rt_val = CURRENT_STATE.REGS[rt];
-
-	// multiply
-	result = rs_val * rt_val;
-
-	// Save result
-	NEXT_STATE.HI = ( result >> 32 );
-	NEXT_STATE.LO = ( result & 0xFFFFFFFF );
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+	// Multiply Register Contents A with Register Contents B - unsigned
+	uint64_t Product = (*ID_EX).A * (*ID_EX).B;
+	(*EX_MEM).ALUOutput 	= (Product & 0xFFFFFFFF);	// Low state
+	(*EX_MEM).ALUOutput2 	= (Product >> 32);			// High state
+	(*EX_MEM).Control = SPECIAL_REGISTER_TYPE;
 }
 
 
-void instr_handler_DIV()
+void instr_handler_DIV(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr;
-	int32_t rs_val, rt_val;
-	uint8_t rs, rt;
-	int32_t quotient, remainder;
-
-	// Get instruction
-	instr = mem_read_32( CURRENT_STATE.PC );
-
-	// Get values
-	rs = GET_RS( instr );
-	rt = GET_RT( instr );
-	rs_val = CURRENT_STATE.REGS[rs];
-	rt_val = CURRENT_STATE.REGS[rt];
-
-	// divide
-	quotient = rs_val / rt_val;
-	remainder = rs_val % rt_val;
-
-	// Save result
-	NEXT_STATE.HI = remainder;
-	NEXT_STATE.LO = quotient;
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+	// Divide Register Contents A by Register Contents B - signed
+	(*EX_MEM).ALUOutput 	= (int32_t)((int32_t)(*ID_EX).A / (int32_t)(*ID_EX).B);	// Low state
+	(*EX_MEM).ALUOutput2 	= (int32_t)((int32_t)(*ID_EX).A % (int32_t)(*ID_EX).B);	// High state
+	(*EX_MEM).Control = SPECIAL_REGISTER_TYPE;
 }
 
 
 void instr_handler_DIVU()
 {
-	uint32_t instr;
-	uint32_t rs_val, rt_val;
-	uint8_t rs, rt;
-	uint32_t quotient, remainder;
-
-	// Get instruction
-	instr = mem_read_32( CURRENT_STATE.PC );
-
-	// Get values
-	rs = GET_RS( instr );
-	rt = GET_RT( instr );
-	rs_val = CURRENT_STATE.REGS[rs];
-	rt_val = CURRENT_STATE.REGS[rt];
-
-	// divide
-	quotient = rs_val / rt_val;
-	remainder = rs_val % rt_val;
-
-	// Save result
-	NEXT_STATE.HI = remainder;
-	NEXT_STATE.LO = quotient;
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+	// Divide Register Contents A by Register Contents B - unsigned
+	(*EX_MEM).ALUOutput 	= (*ID_EX).A / (*ID_EX).B;	// Low state
+	(*EX_MEM).ALUOutput2 	= (*ID_EX).A % (*ID_EX).B;	// High state
+	(*EX_MEM).Control = SPECIAL_REGISTER_TYPE;
 }
 
 
