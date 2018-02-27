@@ -135,71 +135,38 @@ mips_instr_t mips_instr_decode( uint32_t instr )
 }
 
 
-void instr_handler_SLL()
+void instr_handler_SLL( CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM )
 {
-	uint32_t instr;
-	uint32_t rt_val;
-	uint8_t rt, rd, sa;
-
-	// Get instruction
-	instr = mem_read_32(CURRENT_STATE.PC);
-
-	// Get values
-	rt = GET_RT( instr );
-	rd = GET_RD( instr );
-	sa = GET_SA( instr );
-	rt_val = CURRENT_STATE.REGS[rt];
-
-	// Shift left
-	NEXT_STATE.REGS[rd] = rt_val << sa;
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+    uint8_t sa;
+    
+    sa = ( (*EX_MEM).IMMED >> 6 ) & 0x1F;
+    
+    // Shift Left Logical Register Contents A by sa bits
+	(*EX_MEM).ALUOutput = (*ID_EX).A << sa;
+	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
 void instr_handler_SRL()
-{
-	uint32_t instr;
-	uint32_t rt_val;
-	uint8_t rt, rd, sa;
-
-	// Get instruction
-	instr = mem_read_32(CURRENT_STATE.PC);
-
-	// Get values
-	rt = GET_RT( instr );
-	rd = GET_RD( instr );
-	sa = GET_SA( instr );
-	rt_val = CURRENT_STATE.REGS[rt];
-
-	// Shift right and zero extend
-	NEXT_STATE.REGS[rd] = rt_val >> sa;
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+{  
+    uint8_t sa;
+    
+    sa = ( (*EX_MEM).IMMED >> 6 ) & 0x1F;
+    
+    // Shift Right Logical Register Contents A by sa bits
+	(*EX_MEM).ALUOutput = (*ID_EX).A >> sa;
+	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
 
 void instr_handler_SRA()
 {
-	uint32_t instr;
-	int32_t rt_val;
-	uint8_t rt, rd, sa;
-
-	// Get instruction
-	instr = mem_read_32( CURRENT_STATE.PC );
-
-	// Get values
-	rt = GET_RT( instr );
-	rd = GET_RD( instr );
-	sa = GET_SA( instr );
-	rt_val = CURRENT_STATE.REGS[rt];
-
-	// Shift right and sign extend
-	NEXT_STATE.REGS[rd] = rt_val >> sa;
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+    uint8_t sa;
+    
+    sa = ( (*EX_MEM).IMMED >> 6 ) & 0x1F;
+    
+    // Shift Right Logical Register Contents A by sa bits
+	(*EX_MEM).ALUOutput = (int32_t)(*ID_EX).A >> sa;
+	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
 
