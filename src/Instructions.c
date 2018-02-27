@@ -234,85 +234,48 @@ void instr_handler_SYSCALL()
 }
 
 
-void instr_handler_MFHI()
+//move from HI, to rd
+void instr_handler_MFHI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr;
-	int32_t HI_val;
-	uint8_t rd;
-
-	// Get instruction
-	instr = mem_read_32( CURRENT_STATE.PC );
-
-	// Get values
-	rd = GET_RD( instr );
-	HI_val = NEXT_STATE.HI;
-
-	// put contents of HI into rd
-	NEXT_STATE.REGS[rd] = HI_val;
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+    //set ALUOutput to the HI value
+    (*EX_MEM).ALUOutput = CURRENT_STATE.HI;
+    //set type as register
+    (*EX_MEM).Control = REGISTER_TYPE;
+    
+    //WB will move ALUOutput to rd
 }
 
-
-void instr_handler_MTHI()
+//move to HI, from rs
+void instr_handler_MTHI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr;
-	int32_t rs_val;
-	uint8_t rs;
-
-	// Get instruction
-	instr = mem_read_32( CURRENT_STATE.PC );
-
-	rs = GET_RS( instr );
-	rs_val = CURRENT_STATE.REGS[rs];
-
-	// put contents of rs into HI
-	NEXT_STATE.HI = rs_val;
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+    //set ALUOutput2 to rs
+    (*EX_MEM).ALUOutput2 = (int32_t)((int32_t)(*ID_EX).A;
+    //set type as special register
+    (*EX_MEM).Control = SPECIAL_REGISTER_TYPE;
+    
+    //WB will move ALUOutput2 to HI
 }
 
-
-void instr_handler_MFLO()
+//move from LO, to rd
+void instr_handler_MFLO(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr;
-	int32_t LO_val;
-	uint8_t rd;
-
-	// Get instruction
-	instr = mem_read_32( CURRENT_STATE.PC );
-
-	// Get values
-	rd = GET_RD( instr );
-	LO_val = NEXT_STATE.LO;
-
-	// put contents of LO into rd
-	NEXT_STATE.REGS[rd] = LO_val;
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+    //set ALUOutput to the LO value
+    (*EX_MEM).ALUOutput = CURRENT_STATE.LO;
+    //set type as register
+    (*EX_MEM).Control = REGISTER_TYPE;
+    
+    //WB will move ALUOutput to rd
 }
 
-
-void instr_handler_MTLO()
+//move to LO, from rs
+void instr_handler_MTLO(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr;
-	int32_t rs_val;
-	uint8_t rs;
+    //set ALUOutput to rs
+	(*EX_MEM).ALUOutput = (int32_t)((int32_t)(*ID_EX).A;
+    //set type as special register
+    (*EX_MEM).Control = SPECIAL_REGISTER_TYPE;
 
-	// Get instruction
-	instr = mem_read_32( CURRENT_STATE.PC );
-
-	rs = GET_RS( instr );
-	rs_val = CURRENT_STATE.REGS[rs];
-
-	// put contents of rs into LO
-	NEXT_STATE.LO = rs_val;
-
-	// Increment program counter
-	NEXT_STATE.PC += 4;
+    //WB will move ALUOutput to LO
 }
 
 
