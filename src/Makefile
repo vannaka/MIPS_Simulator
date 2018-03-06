@@ -2,8 +2,8 @@ CC_GCC = gcc
 
 CFLAGS = -Wall -g -O2 
 
-SHARED_OBJS = Instructions.o memory.o 
-SIM_OBJS = mu-mips.o $(SHARED_OBJS)
+SHARED_OBJS = Instructions.o memory.o
+SIM_OBJS = mu-mips.o pipeline.o $(SHARED_OBJS)
 ASM_OBJS = assembler.o $(SHARED_OBJS)
 
 %.o: %.c

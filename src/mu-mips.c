@@ -7,7 +7,7 @@
 #include "mu-mips.h"
 #include "Instructions.h"
 #include "memory.h"
-
+#include "pipeline.h"
 
 /***************************************************************/
 /* Print out a list of commands available                      */
@@ -25,6 +25,7 @@ void help()
 	printf("high <val>\t-- set the HI register to <val>\n");
 	printf("low <val>\t-- set the LO register to <val>\n");
 	printf("print\t-- print the program loaded into memory\n");
+	printf("pipe\t-- print the pipeline buffers in memory\n");
 	printf("?\t-- display help menu\n");
 	printf("quit\t-- exit the simulator\n\n");
 	printf("------------------------------------------------------------------\n\n");
@@ -36,7 +37,8 @@ void help()
 /***************************************************************/
 void cycle() 
 {                                                
-	handle_instruction();
+	//handle_instruction();
+	handle_pipeline();
 	CURRENT_STATE = NEXT_STATE;
 	INSTRUCTION_COUNT++;
 }
@@ -187,9 +189,15 @@ void handle_command()
 
 		case 'P':
 		case 'p':
-			print_program(); 
+			if( buffer[1] == 'r' || buffer[1] == 'R' )
+			{
+				print_program();
+			}
+			else if( buffer[1] == 'i' || buffer[1] == 'I' )
+			{
+				show_pipeline();
+			}		 
 			break;
-
 		default:
 			printf( "Invalid Command.\n" );
 			break;
@@ -307,7 +315,31 @@ void print_program()
 	}
 }
 
-
+void show_pipeline()
+{
+	printf("\nCurrent PC:\t\t[0x%x]\n",CURRENT_STATE.PC);
+	if(IF_ID.IR != 0) {
+		printf("IF/ID.IR:\t\t"); print_instruction(IF_ID.PC);
+		printf("IF/ID.PC:\t\t0x%08x\n\n",IF_ID.PC);
+	}
+	if(ID_EX.IR != 0) {
+		printf("ID/EX.IR:\t\t"); print_instruction(ID_EX.PC);
+		printf("ID/EX.A:\t\t0x%08x\n",ID_EX.A);
+		printf("ID/EX.B:\t\t0x%08x\n",ID_EX.B);
+		printf("ID/EX.IMMED:\t\t0x%08x\n\n",ID_EX.IMMED);
+	}
+	if(EX_MEM.IR != 0) {
+		printf("EX/MEM.IR:\t\t"); print_instruction(EX_MEM.PC);
+		printf("EX/MEM.A:\t\t0x%08x\n",EX_MEM.A);
+		printf("EX/MEM.B:\t\t0x%08x\n",EX_MEM.B);
+		printf("EX/MEM.ALUOutput:\t0x%08x\n\n",EX_MEM.ALUOutput);
+	}
+	if(MEM_WB.IR != 0) {
+		printf("MEM/WB.IR:\t\t"); print_instruction(MEM_WB.PC);
+		printf("MEM/WB.ALUOutput:\t0x%08x\n",MEM_WB.ALUOutput);
+		printf("MEM/WB.LMD:\t\t0x%08x\n\n",MEM_WB.LMD);
+	}
+}
 /************************************************************/
 /* Print the instruction at given memory address (in MIPS assembly format)    */
 /************************************************************/
