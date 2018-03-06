@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "pipeline.h"
 #include "memory.h"
 #include "Instructions.h"
@@ -5,47 +7,66 @@
 void handle_pipeline()
 {
     WB();
+    
+    // Update at end of cycle
+    CURRENT_STATE = NEXT_STATE;
+    
     MEM();
-    EX();
+    EX();    
     ID();
     IF();
+    
+    STALL = 0;
 }
 
 void IF()
 {   
-	// Write new values in struct 
-    IF_ID.IR = mem_read_32( CURRENT_STATE.PC );
-    IF_ID.PC = CURRENT_STATE.PC;
-	NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+    if( !STALL )
+    {
+        // Write new values in struct 
+        IF_ID.IR = mem_read_32( CURRENT_STATE.PC );
+        IF_ID.PC = CURRENT_STATE.PC;
+        NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+    }
 }
 
 void ID()
 {
-	if(IF_ID.IR != 0) {
+	if( IF_ID.IR != 0 ) {
 		uint8_t rs, rt;
 		int16_t immed;
-		
-		// Pass on values
-		ID_EX.PC = IF_ID.PC;
-		ID_EX.IR = IF_ID.IR;
 		
 		// Get new values for struct
 		rs = GET_RS( IF_ID.IR );
 		rt = GET_RT( IF_ID.IR );
 		immed = GET_IMMED( IF_ID.IR );
-		
-		// Write new values in struct
-		ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
         
-		ID_EX.A = CURRENT_STATE.REGS[rs];
-		ID_EX.B = CURRENT_STATE.REGS[rt];
-		ID_EX.IMMED = (int32_t)immed;
+                
+        //Check for data hazards
+        
+        STALL = checkDataHazard();
+        
+        if( !STALL )
+        {
+            // Pass on values
+            ID_EX.PC = IF_ID.PC;
+            ID_EX.IR = IF_ID.IR;
+            
+            // Write new values in struct
+            ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
+            
+            ID_EX.A = CURRENT_STATE.REGS[rs];
+            ID_EX.B = CURRENT_STATE.REGS[rt];
+            ID_EX.IMMED = (int32_t)immed;
+        }
+        else
+            printf("\nSTALLED\n");
 	}
 }
 
 void EX()
 {
-	if(ID_EX.IR != 0) {
+	if( ID_EX.IR != 0 ) {
 		// Pass on values
 		EX_MEM.PC = ID_EX.PC;
 		EX_MEM.IR = ID_EX.IR;
@@ -58,11 +79,13 @@ void EX()
         
         // TODO: IF Branch take action
 	}
+	
+	ID_EX.IR = 0;
 }
 
 void MEM()
 {  
-	if(EX_MEM.IR != 0) {
+	if( EX_MEM.IR != 0 ) {
 		// Pass on values	
 		MEM_WB = EX_MEM;
 		MEM_WB.IR = EX_MEM.IR;
@@ -97,11 +120,14 @@ void MEM()
 			default:					/*	Do nothing	*/	break;
 		}
 	}
+	
+	
+	EX_MEM.IR = 0;
 }
 
 void WB()
 {
-	if(MEM_WB.IR != 0) {
+	if( MEM_WB.IR != 0 ) {
 		// Write new values dependent upon control type
 		switch(MEM_WB.Control){
 			case LOAD_TYPE:			NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.LMD;			break;
@@ -120,4 +146,68 @@ void WB()
 			default:				/*	Do nothing	*/	break;
 		}
 	}
+	
+	MEM_WB.IR = 0;
 }
+
+uint8_t checkDataHazard()
+{
+    uint8_t dest;
+    
+    // Check for hazard with execute stage
+    if( EX_MEM.instr_data.type == R_TYPE )
+    {
+        dest = GET_RD( EX_MEM.IR );
+    }
+    else if( EX_MEM.instr_data.type == I_TYPE )
+    {
+        dest = GET_RT( EX_MEM.IR );
+    }
+    else
+        dest = 0;
+    
+    
+    if ( ( dest != 0 ) && ( dest == GET_RS( IF_ID.IR ) ) )
+        return 1;
+    
+    if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) )
+        return 1;
+    
+    
+    // Check for hazazrd with Memory stage
+    if( MEM_WB.instr_data.type == R_TYPE )
+    {
+        dest = GET_RD( MEM_WB.IR );
+    }
+    else if( MEM_WB.instr_data.type == I_TYPE )
+    {
+        dest = GET_RT( MEM_WB.IR );
+    }
+    else
+        dest = 0;
+    
+    if ( ( dest != 0 ) && ( dest == GET_RS( IF_ID.IR ) ) )
+        return 1;
+    
+    if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) )
+        return 1;
+    
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

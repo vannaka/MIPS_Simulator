@@ -47,14 +47,16 @@ CPU_Pipeline_Reg MEM_WB;
 
 
 // function declarations
-void handle_pipeline(); /*IMPLEMENT THIS*/
-void WB();  /*IMPLEMENT THIS*/
-void MEM(); /*IMPLEMENT THIS*/
-void EX();  /*IMPLEMENT THIS*/
-void ID();  /*IMPLEMENT THIS*/
-void IF();  /*IMPLEMENT THIS*/
-void show_pipeline();/*IMPLEMENT THIS*/
-void print_program(); /*IMPLEMENT THIS*/
+void handle_pipeline();
+void WB();
+void MEM();
+void EX();
+void ID();
+void IF();
+void show_pipeline();
+void print_program();
+
+uint8_t checkDataHazard();
 
 
 #endif

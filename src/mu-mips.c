@@ -39,7 +39,7 @@ void cycle()
 {                                                
 	//handle_instruction();
 	handle_pipeline();
-	CURRENT_STATE = NEXT_STATE;
+	//CURRENT_STATE = NEXT_STATE;
 	INSTRUCTION_COUNT++;
 }
 
