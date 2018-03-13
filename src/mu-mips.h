@@ -24,7 +24,7 @@ uint32_t PROGRAM_SIZE; /*in words*/
 char prog_file[64];
 
 uint8_t STALL;
-
+uint8_t ENABLE_FORWARDING;
 
 /***************************************************************/
 /* Function Declerations.                                      */

@@ -29,11 +29,13 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t B;    // ALU input
 	int32_t IMMED;
 	uint32_t ALUOutput;
-        uint32_t ALUOutput2;    // Used for Multiply and Divide instrs
+    uint32_t ALUOutput2;    // Used for Multiply and Divide instrs
 	uint32_t LMD;
 	mips_instr_t instr_data;
 	CONTROL_TYPE Control;
 	DATA_SIZE num_bytes;	// For store/load specify 1, 2, or 4 bytes. Ex() changes this value and MEM() and WB() should use this
+	uint32_t FORWARDA;
+	uint32_t FORWARDB;
 } CPU_Pipeline_Reg;
 
 
@@ -57,6 +59,6 @@ void show_pipeline();
 void print_program();
 
 uint8_t checkDataHazard();
-
+uint8_t checkForward();
 
 #endif

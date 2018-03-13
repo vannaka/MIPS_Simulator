@@ -41,22 +41,40 @@ void ID()
 		rt = GET_RT( IF_ID.IR );
 		immed = GET_IMMED( IF_ID.IR );
         
+		// Write new values in struct
+        ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
+            
                 
         //Check for data hazards
-        
-        STALL = checkDataHazard();
-        
+		if(!ENABLE_FORWARDING)		
+        	STALL = checkDataHazard();
+		else
+			STALL = checkForward();
+
         if( !STALL )
         {
             // Pass on values
             ID_EX.PC = IF_ID.PC;
             ID_EX.IR = IF_ID.IR;
             
-            // Write new values in struct
-            ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
-            
-            ID_EX.A = CURRENT_STATE.REGS[rs];
-            ID_EX.B = CURRENT_STATE.REGS[rt];
+			switch(ID_EX.FORWARDA){
+            	case 0: 	ID_EX.A = CURRENT_STATE.REGS[rs];	break;
+				case 1:		ID_EX.A = EX_MEM.ALUOutput;			break;
+				case 2:		ID_EX.A = EX_MEM.ALUOutput2;		break;
+				case 3:		ID_EX.A = MEM_WB.ALUOutput;			break;
+				case 4:		ID_EX.A = MEM_WB.ALUOutput2;		break;	
+				case 5:		ID_EX.A = MEM_WB.LMD;				break;							
+				default:	printf("\nERROR FORWARD A");		break;
+			}
+			switch(ID_EX.FORWARDB){
+            	case 0: 	ID_EX.B = CURRENT_STATE.REGS[rt];	break;
+				case 1:		ID_EX.B = EX_MEM.ALUOutput;			break;
+				case 2:		ID_EX.B = EX_MEM.ALUOutput2;		break;
+				case 3:		ID_EX.B = MEM_WB.ALUOutput;			break;
+				case 4:		ID_EX.B = MEM_WB.ALUOutput2;		break;	
+				case 5:		ID_EX.B = MEM_WB.LMD;				break;							
+				default:	printf("\nERROR FORWARD B");		break;
+			}
             ID_EX.IMMED = (int32_t)immed;
         }
         else
@@ -191,6 +209,99 @@ uint8_t checkDataHazard()
     
     if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) )
         return 1;
+    
+    return 0;
+}
+
+uint8_t checkForward()
+{
+    uint8_t dest;
+    
+	uint8_t 	bMultDivForward = ((EX_MEM.instr_data.opcode = 0x00) 
+								&& (((EX_MEM.instr_data.funct_code >= 0x18) && (EX_MEM.instr_data.funct_code <= 0x1B))
+								|| (EX_MEM.instr_data.funct_code <= 0x11) || (EX_MEM.instr_data.funct_code <= 0x13)));
+
+	// Check for hazard with execute stage
+	if(!bMultDivForward) {
+		if( EX_MEM.instr_data.type == R_TYPE )
+		{
+		    dest = GET_RD( EX_MEM.IR );
+		}
+		else if( EX_MEM.instr_data.type == I_TYPE )
+		{
+		    dest = GET_RT( EX_MEM.IR );
+		}
+		else
+		    dest = 0;
+		
+		if ( ( dest != 0 ) && ( dest == GET_RS( IF_ID.IR ) ) ) {
+			if (EX_MEM.Control == LOAD_TYPE){
+				return 1;	// Stall
+			}
+			else{	
+				IF_ID.FORWARDA = 1;		// Case of forwarding ALUOutput from execute
+			}
+		}
+		if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) ){
+			if (EX_MEM.Control == LOAD_TYPE){
+				return 1;	// Stall
+			}
+			else{	
+				IF_ID.FORWARDB = 1;	// Case of forwarding ALUOutput from execute	
+			}
+		}
+	}
+	else {
+		// If ex_mem has a mult or div instruction running and we need to forward to move from high or low
+		if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x10))
+			IF_ID.FORWARDA = 2;	// Case of forwarding ALUOutput2 from execute
+		else if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x12))	
+			IF_ID.FORWARDA = 1;	// Case of forwarding ALUOutput from execute
+	}
+    
+
+	bMultDivForward = ((MEM_WB.instr_data.opcode = 0x00) 
+								&& (((MEM_WB.instr_data.funct_code >= 0x18) && (MEM_WB.instr_data.funct_code <= 0x1B))
+								|| (MEM_WB.instr_data.funct_code <= 0x11) || (MEM_WB.instr_data.funct_code <= 0x13)));
+
+    // Check for hazazrd with Memory stage
+	if(!bMultDivForward) {
+		if( MEM_WB.instr_data.type == R_TYPE )
+		{
+		    dest = GET_RD( MEM_WB.IR );
+		}
+		else if( MEM_WB.instr_data.type == I_TYPE )
+		{
+		    dest = GET_RT( MEM_WB.IR );
+		}
+		else
+		    dest = 0;
+		
+		if ( ( dest != 0 ) && ( dest == GET_RS( IF_ID.IR ) ) ){
+			if (EX_MEM.Control == LOAD_TYPE){
+				IF_ID.FORWARDA = 5;	// Case of forwarding LMD from execute
+			}
+			else{	
+				IF_ID.FORWARDA = 1;	// Case of forwarding Aluoutput from execute
+			}
+		}
+		
+		if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) ){
+			if (EX_MEM.Control == LOAD_TYPE){
+				IF_ID.FORWARDB = 5;	// Case of forwarding LMD from execute
+			}
+			else{	
+				IF_ID.FORWARDB = 1;	// Case of forwarding Aluoutput from execute
+			}
+		}
+	}
+	else {
+		// If ex_mem has a mult or div instruction running and we need to forward to move from high or low
+		if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x10))
+			IF_ID.FORWARDA = 2;	// Case of forwarding ALUOutput2 from execute
+		else if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x12))	
+			IF_ID.FORWARDA = 1;	// Case of forwarding ALUOutput from execute
+	}
     
     return 0;
 }
