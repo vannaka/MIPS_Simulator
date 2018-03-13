@@ -57,7 +57,7 @@ void ID()
             ID_EX.PC = IF_ID.PC;
             ID_EX.IR = IF_ID.IR;
             
-			switch(ID_EX.FORWARDA){
+			switch(IF_ID.FORWARDA){
             	case 0: 	ID_EX.A = CURRENT_STATE.REGS[rs];	break;
 				case 1:		ID_EX.A = EX_MEM.ALUOutput;			break;
 				case 2:		ID_EX.A = EX_MEM.ALUOutput2;		break;
@@ -66,7 +66,7 @@ void ID()
 				case 5:		ID_EX.A = MEM_WB.LMD;				break;							
 				default:	printf("\nERROR FORWARD A");		break;
 			}
-			switch(ID_EX.FORWARDB){
+			switch(IF_ID.FORWARDB){
             	case 0: 	ID_EX.B = CURRENT_STATE.REGS[rt];	break;
 				case 1:		ID_EX.B = EX_MEM.ALUOutput;			break;
 				case 2:		ID_EX.B = EX_MEM.ALUOutput2;		break;
@@ -76,10 +76,16 @@ void ID()
 				default:	printf("\nERROR FORWARD B");		break;
 			}
             ID_EX.IMMED = (int32_t)immed;
+
+			printf("\nContents A: %08x, Forward Case: %d,",ID_EX.A, IF_ID.FORWARDA);
+			printf("\tContents B: %08x, Forward Case: %d,",ID_EX.B, IF_ID.FORWARDB);
         }
         else
-            printf("\nSTALLED\n");
+            printf("\nSTALLED");
 	}
+
+	IF_ID.FORWARDA = 0;
+	IF_ID.FORWARDB = 0;
 }
 
 void EX()
@@ -219,7 +225,7 @@ uint8_t checkForward()
     
 	uint8_t 	bMultDivForward = ((EX_MEM.instr_data.opcode = 0x00) 
 								&& (((EX_MEM.instr_data.funct_code >= 0x18) && (EX_MEM.instr_data.funct_code <= 0x1B))
-								|| (EX_MEM.instr_data.funct_code <= 0x11) || (EX_MEM.instr_data.funct_code <= 0x13)));
+								|| (EX_MEM.instr_data.funct_code == 0x11) || (EX_MEM.instr_data.funct_code == 0x13)));
 
 	// Check for hazard with execute stage
 	if(!bMultDivForward) {
@@ -262,7 +268,7 @@ uint8_t checkForward()
 
 	bMultDivForward = ((MEM_WB.instr_data.opcode = 0x00) 
 								&& (((MEM_WB.instr_data.funct_code >= 0x18) && (MEM_WB.instr_data.funct_code <= 0x1B))
-								|| (MEM_WB.instr_data.funct_code <= 0x11) || (MEM_WB.instr_data.funct_code <= 0x13)));
+								|| (MEM_WB.instr_data.funct_code == 0x11) || (MEM_WB.instr_data.funct_code == 0x13)));
 
     // Check for hazazrd with Memory stage
 	if(!bMultDivForward) {
@@ -282,7 +288,7 @@ uint8_t checkForward()
 				IF_ID.FORWARDA = 5;	// Case of forwarding LMD from execute
 			}
 			else{	
-				IF_ID.FORWARDA = 1;	// Case of forwarding Aluoutput from execute
+				IF_ID.FORWARDA = 3;	// Case of forwarding Aluoutput from execute
 			}
 		}
 		
@@ -291,16 +297,16 @@ uint8_t checkForward()
 				IF_ID.FORWARDB = 5;	// Case of forwarding LMD from execute
 			}
 			else{	
-				IF_ID.FORWARDB = 1;	// Case of forwarding Aluoutput from execute
+				IF_ID.FORWARDB = 3;	// Case of forwarding Aluoutput from execute
 			}
 		}
 	}
 	else {
-		// If ex_mem has a mult or div instruction running and we need to forward to move from high or low
+		// If MEM_WB has a mult or div instruction running and we need to forward to move from high or low
 		if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x10))
-			IF_ID.FORWARDA = 2;	// Case of forwarding ALUOutput2 from execute
+			IF_ID.FORWARDA = 4;	// Case of forwarding ALUOutput2 from execute
 		else if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x12))	
-			IF_ID.FORWARDA = 1;	// Case of forwarding ALUOutput from execute
+			IF_ID.FORWARDA = 3;	// Case of forwarding ALUOutput from execute
 	}
     
     return 0;
