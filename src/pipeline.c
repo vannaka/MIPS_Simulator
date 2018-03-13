@@ -239,7 +239,8 @@ uint8_t checkForward()
 		}
 		else
 		    dest = 0;
-		
+
+		// Check if destination register is same as first source		
 		if ( ( dest != 0 ) && ( dest == GET_RS( IF_ID.IR ) ) ) {
 			if (EX_MEM.Control == LOAD_TYPE){
 				return 1;	// Stall
@@ -248,6 +249,8 @@ uint8_t checkForward()
 				IF_ID.FORWARDA = 1;		// Case of forwarding ALUOutput from execute
 			}
 		}
+
+		// Check if destination register is same as second source
 		if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) ){
 			if (EX_MEM.Control == LOAD_TYPE){
 				return 1;	// Stall
@@ -283,30 +286,32 @@ uint8_t checkForward()
 		else
 		    dest = 0;
 		
+		// Check if destination register is same as first source
 		if ( ( dest != 0 ) && ( dest == GET_RS( IF_ID.IR ) ) ){
 			if (EX_MEM.Control == LOAD_TYPE){
-				IF_ID.FORWARDA = 5;	// Case of forwarding LMD from execute
+				IF_ID.FORWARDA = 5;	// Case of forwarding LMD from memory
 			}
 			else{	
-				IF_ID.FORWARDA = 3;	// Case of forwarding Aluoutput from execute
+				IF_ID.FORWARDA = 3;	// Case of forwarding Aluoutput from memory
 			}
 		}
 		
+		// Check if destination register is same as second source
 		if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) ){
 			if (EX_MEM.Control == LOAD_TYPE){
-				IF_ID.FORWARDB = 5;	// Case of forwarding LMD from execute
+				IF_ID.FORWARDB = 5;	// Case of forwarding LMD from memory
 			}
 			else{	
-				IF_ID.FORWARDB = 3;	// Case of forwarding Aluoutput from execute
+				IF_ID.FORWARDB = 3;	// Case of forwarding Aluoutput from memory
 			}
 		}
 	}
 	else {
 		// If MEM_WB has a mult or div instruction running and we need to forward to move from high or low
 		if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x10))
-			IF_ID.FORWARDA = 4;	// Case of forwarding ALUOutput2 from execute
+			IF_ID.FORWARDA = 4;	// Case of forwarding ALUOutput2 from memory
 		else if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x12))	
-			IF_ID.FORWARDA = 3;	// Case of forwarding ALUOutput from execute
+			IF_ID.FORWARDA = 3;	// Case of forwarding ALUOutput from memory
 	}
     
     return 0;
