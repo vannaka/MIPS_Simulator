@@ -210,7 +210,7 @@ void instr_handler_JALR()
 }
 
 
-void instr_handler_SYSCALL()
+void instr_handler_SYSCALL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	int32_t v0_val;
 	int32_t a0_val;
