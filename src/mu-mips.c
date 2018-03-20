@@ -26,6 +26,7 @@ void help()
 	printf("low <val>\t-- set the LO register to <val>\n");
 	printf("print\t-- print the program loaded into memory\n");
 	printf("pipe\t-- print the pipeline buffers in memory\n");
+	printf("forward\t-- enable/disable forwarding\n");
 	printf("?\t-- display help menu\n");
 	printf("quit\t-- exit the simulator\n\n");
 	printf("------------------------------------------------------------------\n\n");
@@ -198,6 +199,13 @@ void handle_command()
 				show_pipeline();
 			}		 
 			break;
+		case 'f':
+		case 'F':
+			if (scanf("%d", (int*)&ENABLE_FORWARDING) != 1) {
+				break;
+			}
+				ENABLE_FORWARDING == 0 ? printf("Forwarding OFF\n") : printf("Forwarding ON\n");
+			break;
 		default:
 			printf( "Invalid Command.\n" );
 			break;
@@ -225,6 +233,11 @@ void reset()
 		memset( MEM_REGIONS[i].mem, 0, region_size );
 	}
 	
+	memset( &IF_ID, 0, sizeof(CPU_Pipeline_Reg) );
+	memset( &ID_EX, 0, sizeof(CPU_Pipeline_Reg) );
+	memset( &EX_MEM, 0, sizeof(CPU_Pipeline_Reg) );
+	memset( &MEM_WB, 0, sizeof(CPU_Pipeline_Reg) );
+
 	/*load program*/
 	load_program();
 	
@@ -422,7 +435,7 @@ int main( int argc, char *argv[] )
 		printf( "Error: You should provide input file.\nUsage: %s <input program> \n\n",  argv[0] );
 		exit(1);
 	}
-	ENABLE_FORWARDING = 1; //TODO remove
+	ENABLE_FORWARDING = 0;
 	strcpy( prog_file, argv[1] );
 	initialize();
 	load_program();
