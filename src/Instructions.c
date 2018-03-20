@@ -219,7 +219,7 @@ void instr_handler_SYSCALL()
 	a0_val = CURRENT_STATE.REGS[4];
 	switch( v0_val ) {
 		case 0x01:	printf("%d\n", a0_val);		break;	// print integer
-		case 0x0A:	RUN_FLAG = 0;				break;	// exit program
+		case 0x0A:	WB(); RUN_FLAG = 0;			break;	// exit program
 		default:								return;
 	}
 }

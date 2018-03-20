@@ -7,10 +7,6 @@
 void handle_pipeline()
 {
     WB();
-    
-    // Update at end of cycle
-    CURRENT_STATE = NEXT_STATE;
-    
     MEM();
     EX();    
     ID();
@@ -172,6 +168,9 @@ void WB()
 	}
 	
 	MEM_WB.IR = 0;
+   
+    // Update at end of cycle
+    CURRENT_STATE = NEXT_STATE;
 }
 
 uint8_t checkDataHazard()
