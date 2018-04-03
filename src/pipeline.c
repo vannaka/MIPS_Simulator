@@ -39,7 +39,7 @@ void ID()
         
 		// Write new values in struct
         ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
-        
+      ID_EX.IR = 0;  
         // Check for control hazards
         STALL = checkControlHazard();
         
@@ -139,6 +139,7 @@ void MEM()
 				break;
 			case REGISTER_TYPE:			/*	Do nothing	*/	break;
 			case SPECIAL_REGISTER_TYPE:	/*	Do nothing	*/	break;
+            case BRANCH_TYPE:           /*  DO nothing  */  break;
 			default:					/*	Do nothing	*/	break;
 		}
 	}
@@ -223,7 +224,14 @@ uint8_t checkDataHazard()
 
 uint8_t checkControlHazard()
 {
+    uint8_t fcode = ID_EX.instr_data.funct_code;
+    uint8_t opcode = ID_EX.instr_data.opcode;
     
+   
+    if( isBranch( opcode, fcode ) )
+        return 1;
+    
+    return 0;
 }
 
 
