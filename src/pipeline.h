@@ -11,7 +11,8 @@ typedef enum
 	LOAD_TYPE, 
 	STORE_TYPE, 
 	REGISTER_TYPE,
-	SPECIAL_REGISTER_TYPE
+	SPECIAL_REGISTER_TYPE,
+	BRANCH_TYPE
 } CONTROL_TYPE;
 
 typedef enum 
@@ -59,6 +60,7 @@ void show_pipeline();
 void print_program();
 
 uint8_t checkDataHazard();
+uint8_t checkControlHazard();
 uint8_t checkForward();
 
 #endif

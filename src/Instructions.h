@@ -16,6 +16,11 @@
 #define SET_OPCODE(x, op)       ( x |= ( ( op ) << 26) )
 #define SET_FUNCTCODE(x, fc)    ( x |= ( fc ) )
 
+#define isBranch(op, func) ( ( op == 0x01 ) || \
+                             ( op <= 0x07 && op >= 0x02) || \
+                             ( ( op == 0x00 ) && ( func == 0x08 || func == 0x09 ) ) )
+ 
+
 #define intr_lookup_limit	0x2C
 #define opcode_0x01_limit   0x02
 #define opcode_0x00_limit   0x2B
