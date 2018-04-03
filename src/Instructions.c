@@ -170,43 +170,34 @@ void instr_handler_SRA(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 }
 
 
-void instr_handler_JR()
+void instr_handler_JR(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr;
-	int32_t rs_val;
-	uint8_t rs;
 
-	// Get instruction
-	instr = mem_read_32(CURRENT_STATE.PC);
+	int32_t rs_val;
 
 	// Get values
-	rs = GET_RS(instr);
-	rs_val = CURRENT_STATE.REGS[rs];
+	rs_val = (*ID_EX).A;
 
 	// jump to specified address
 	NEXT_STATE.PC = rs_val;
+
+	(*EX_MEM).Control = BRANCH_TYPE;
 }
 
 
-void instr_handler_JALR()
+void instr_handler_JALR(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr;
 	int32_t rs_val;
-	uint8_t rs, rd;
 
-	// Get instruction
-	instr = mem_read_32( CURRENT_STATE.PC );
-
-	// Get values
-	rs = GET_RS( instr );
-	rd = GET_RD( instr );
-	rs_val = CURRENT_STATE.REGS[rs];
+	rs_val =(*ID_EX).A;
 
 	// save return addr
-	NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
+	//NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
 
 	// jmp to new addr
 	NEXT_STATE.PC = rs_val;
+	(*EX_MEM).ALUOutput = CURRENT_STATE.PC + 4;
+	(*EX_MEM).Control = BRANCH_TYPE;
 }
 
 
@@ -387,155 +378,126 @@ void instr_handler_SLT(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 }
 
 
-void instr_handler_BLTZ()
+void instr_handler_BLTZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-	uint8_t rs = GET_RS( instr );
 	uint16_t immed = GET_IMMED( instr );
 
-	if( CURRENT_STATE.REGS[rs] < 0x0 )
+	// Check RS < 0
+	if( (*ID_EX).A < 0x0 )
 	{
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+		// Add immediate to PC
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
 	}
+
+	(*EX_MEM).Control = BRANCH_TYPE;
 }
 
 
 void instr_handler_BGEZ()
 {
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-	uint8_t rs = GET_RS( instr );
 	uint16_t immed = GET_IMMED( instr );
 
-	if( CURRENT_STATE.REGS[rs] >= 0x0 )
+	// Check RS >= 0
+	if( (*ID_EX).A >= 0x0 )
 	{
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+		// Add immediate to PC
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
 	}
+
+	(*EX_MEM).ALUOutput = CURRENT_STATE.PC + 4;
+	(*EX_MEM).Control = BRANCH_TYPE;
 }
 
 
-void instr_handler_J()
+void instr_handler_J(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint32_t instr = mem_read_32( ID_EX.PC );
 	uint32_t target = GET_ADDRESS( instr );
 	NEXT_STATE.PC = ( CURRENT_STATE.PC & 0xF0000000 ) | ( target << 2 );
 }
 
 
-void instr_handler_JAL()
+void instr_handler_JAL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
+	uint32_t instr = mem_read_32( ID_EX.PC );
 	uint32_t target = GET_ADDRESS( instr );
-	NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
+	//NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
 	NEXT_STATE.PC = ( CURRENT_STATE.PC & 0xF0000000 ) | ( target << 2 );
+
+	(*EX_MEM).ALUOutput = CURRENT_STATE.PC + 4;
+	(*EX_MEM).Control = BRANCH_TYPE;
 }
 
 
 //branch on equal
 void instr_handler_BEQ()
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	uint8_t rt = GET_RT( instr );
-	int16_t immed = GET_IMMED( instr );
-
-	uint32_t rs_val = CURRENT_STATE.REGS[rs];
-	uint32_t rt_val = CURRENT_STATE.REGS[rt];
-
 	//if equal, branch
-	if( rs_val == rt_val )
+	if( (*ID_EX).A == (*ID_EX).B )
 	{
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
 	}
-
+	(*EX_MEM).Control = BRANCH_TYPE;
 }
 
 
 //branch on not equal
 void instr_handler_BNE()
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	uint8_t rt = GET_RT( instr );
-	int16_t immed = GET_IMMED( instr );
-
-	uint32_t rs_val = CURRENT_STATE.REGS[rs];
-	uint32_t rt_val = CURRENT_STATE.REGS[rt];
-
-	if( rs_val != rt_val )
+	//if not equal, branch
+	if( (*ID_EX).A != (*ID_EX).B )
 	{
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
 	}
+	(*EX_MEM).Control = BRANCH_TYPE;
 }
 
 
 //branch on less than or equal to zero
 void instr_handler_BLEZ()
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	int16_t immed = GET_IMMED( instr );
-
-	uint32_t rs_val = CURRENT_STATE.REGS[rs];
-
 	//if less than equal to zero, branch
-	if( rs_val <= 0x0 )
+	if( (*ID_EX).A <= 0x0 )
 	{
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
 	}
-
+	(*EX_MEM).Control = BRANCH_TYPE;
 }
 
 
 //brnach on greater than or equal to zero
 void instr_handler_BGTZ()
 {
-	//get the instruction
-	uint32_t instr = mem_read_32( CURRENT_STATE.PC );
-
-	//get registers and immediate from instr
-	uint8_t rs = GET_RS( instr );
-	int16_t immed = GET_IMMED( instr );
-
-	uint32_t rs_val = CURRENT_STATE.REGS[rs];
-
 	//if greater than equal to zero, branch
-	if( rs_val >= 0x0 )
+	if( (*ID_EX).A >= 0x0 )
 	{
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + immed);
+		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
 	}
+	(*EX_MEM).Control = BRANCH_TYPE;
 }
 
 
