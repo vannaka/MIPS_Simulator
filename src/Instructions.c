@@ -380,8 +380,6 @@ void instr_handler_SLT(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 
 void instr_handler_BLTZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint16_t immed = GET_IMMED( instr );
-
 	// Check RS < 0
 	if( (*ID_EX).A < 0x0 )
 	{
@@ -397,11 +395,9 @@ void instr_handler_BLTZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 }
 
 
-void instr_handler_BGEZ()
+void instr_handler_BGEZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint16_t immed = GET_IMMED( instr );
-
-	// Check RS >= 0
+// Check RS >= 0
 	if( (*ID_EX).A >= 0x0 )
 	{
 		// Add immediate to PC
@@ -419,7 +415,7 @@ void instr_handler_BGEZ()
 
 void instr_handler_J(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr = mem_read_32( ID_EX.PC );
+	uint32_t instr = mem_read_32( (*ID_EX).PC );
 	uint32_t target = GET_ADDRESS( instr );
 	NEXT_STATE.PC = ( CURRENT_STATE.PC & 0xF0000000 ) | ( target << 2 );
 }
@@ -427,7 +423,7 @@ void instr_handler_J(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 
 void instr_handler_JAL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
-	uint32_t instr = mem_read_32( ID_EX.PC );
+	uint32_t instr = mem_read_32( (*ID_EX).PC );
 	uint32_t target = GET_ADDRESS( instr );
 	//NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
 	NEXT_STATE.PC = ( CURRENT_STATE.PC & 0xF0000000 ) | ( target << 2 );
@@ -438,7 +434,7 @@ void instr_handler_JAL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 
 
 //branch on equal
-void instr_handler_BEQ()
+void instr_handler_BEQ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	//if equal, branch
 	if( (*ID_EX).A == (*ID_EX).B )
@@ -454,7 +450,7 @@ void instr_handler_BEQ()
 
 
 //branch on not equal
-void instr_handler_BNE()
+void instr_handler_BNE(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	//if not equal, branch
 	if( (*ID_EX).A != (*ID_EX).B )
@@ -470,7 +466,7 @@ void instr_handler_BNE()
 
 
 //branch on less than or equal to zero
-void instr_handler_BLEZ()
+void instr_handler_BLEZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	//if less than equal to zero, branch
 	if( (*ID_EX).A <= 0x0 )
@@ -486,7 +482,7 @@ void instr_handler_BLEZ()
 
 
 //brnach on greater than or equal to zero
-void instr_handler_BGTZ()
+void instr_handler_BGTZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	//if greater than equal to zero, branch
 	if( (*ID_EX).A >= 0x0 )
