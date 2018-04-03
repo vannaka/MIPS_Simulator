@@ -39,12 +39,14 @@ void ID()
         
 		// Write new values in struct
         ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
-            
-                
+        
+        // Check for control hazards
+        STALL = checkControlHazard();
+        
         //Check for data hazards
-		if(!ENABLE_FORWARDING)		
+		if(!ENABLE_FORWARDING && !STALL)
         	STALL = checkDataHazard();
-		else
+		else if( !STALL )
 			STALL = checkForward();
 
         if( !STALL )
@@ -136,7 +138,7 @@ void MEM()
 				}
 				break;
 			case REGISTER_TYPE:			/*	Do nothing	*/	break;
-			case SPECIAL_REGISTER_TYPE:	/*	Do nothing	*/	break; 
+			case SPECIAL_REGISTER_TYPE:	/*	Do nothing	*/	break;
 			default:					/*	Do nothing	*/	break;
 		}
 	}
@@ -217,6 +219,13 @@ uint8_t checkDataHazard()
     
     return 0;
 }
+
+
+uint8_t checkControlHazard()
+{
+    
+}
+
 
 uint8_t checkForward()
 {

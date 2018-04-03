@@ -158,7 +158,7 @@ void instr_handler_SRL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 }
 
 
-void instr_handler_SRA(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
+void instr_handler_SRA( CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM )
 {
     uint8_t sa;
     

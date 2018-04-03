@@ -59,6 +59,7 @@ void show_pipeline();
 void print_program();
 
 uint8_t checkDataHazard();
+uint8_t checkControlHazard();
 uint8_t checkForward();
 
 #endif
