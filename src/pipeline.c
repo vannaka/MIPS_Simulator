@@ -166,6 +166,15 @@ void WB()
 				NEXT_STATE.LO = MEM_WB.ALUOutput;
 				NEXT_STATE.HI = MEM_WB.ALUOutput2;
 				break;
+			case BRANCH_TYPE:
+				// JALR			
+				if(MEM_WB.instr_data.opcode == 0x00 && MEM_WB.instr_data.subtable.opcode == 0x09){
+					NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 				
+				}
+				// JAL
+				else if(MEM_WB.instr_data.opcode == 0x03){
+					NEXT_STATE.REGS[31] = MEM_WB.ALUOutput;
+				}
 			default:				/*	Do nothing	*/	break;
 		}
 	}
