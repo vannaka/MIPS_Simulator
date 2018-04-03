@@ -182,6 +182,7 @@ void instr_handler_JR(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	NEXT_STATE.PC = rs_val;
 
 	(*EX_MEM).Control = BRANCH_TYPE;
+	(*EX_MEM).flush = 1;
 }
 
 
@@ -198,6 +199,7 @@ void instr_handler_JALR(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	NEXT_STATE.PC = rs_val;
 	(*EX_MEM).ALUOutput = CURRENT_STATE.PC + 4;
 	(*EX_MEM).Control = BRANCH_TYPE;
+	(*EX_MEM).flush = 1;
 }
 
 
@@ -385,10 +387,12 @@ void instr_handler_BLTZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	{
 		// Add immediate to PC
 		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		(*EX_MEM).flush = 1;
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
+		(*EX_MEM).flush = 0;
 	}
 
 	(*EX_MEM).Control = BRANCH_TYPE;
@@ -402,10 +406,12 @@ void instr_handler_BGEZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	{
 		// Add immediate to PC
 		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		(*EX_MEM).flush = 1;
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
+		(*EX_MEM).flush = 0;
 	}
 
 	(*EX_MEM).ALUOutput = CURRENT_STATE.PC + 4;
@@ -418,6 +424,7 @@ void instr_handler_J(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	uint32_t instr = mem_read_32( (*ID_EX).PC );
 	uint32_t target = GET_ADDRESS( instr );
 	NEXT_STATE.PC = ( CURRENT_STATE.PC & 0xF0000000 ) | ( target << 2 );
+	(*EX_MEM).flush = 1;
 }
 
 
@@ -430,6 +437,7 @@ void instr_handler_JAL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 
 	(*EX_MEM).ALUOutput = CURRENT_STATE.PC + 4;
 	(*EX_MEM).Control = BRANCH_TYPE;
+	(*EX_MEM).flush = 1;
 }
 
 
@@ -440,10 +448,12 @@ void instr_handler_BEQ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	if( (*ID_EX).A == (*ID_EX).B )
 	{
 		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		(*EX_MEM).flush = 1;
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
+		(*EX_MEM).flush = 0;
 	}
 	(*EX_MEM).Control = BRANCH_TYPE;
 }
@@ -456,10 +466,12 @@ void instr_handler_BNE(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	if( (*ID_EX).A != (*ID_EX).B )
 	{
 		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		(*EX_MEM).flush = 1;
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
+		(*EX_MEM).flush = 0;
 	}
 	(*EX_MEM).Control = BRANCH_TYPE;
 }
@@ -472,10 +484,12 @@ void instr_handler_BLEZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	if( (*ID_EX).A <= 0x0 )
 	{
 		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		(*EX_MEM).flush = 1;
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
+		(*EX_MEM).flush = 0;
 	}
 	(*EX_MEM).Control = BRANCH_TYPE;
 }
@@ -488,10 +502,12 @@ void instr_handler_BGTZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	if( (*ID_EX).A >= 0x0 )
 	{
 		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		(*EX_MEM).flush = 1;
 	}
 	else
 	{
 		NEXT_STATE.PC += 4;
+		(*EX_MEM).flush = 0;
 	}
 	(*EX_MEM).Control = BRANCH_TYPE;
 }

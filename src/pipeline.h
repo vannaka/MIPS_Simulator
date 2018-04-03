@@ -37,6 +37,7 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	DATA_SIZE num_bytes;	// For store/load specify 1, 2, or 4 bytes. Ex() changes this value and MEM() and WB() should use this
 	uint32_t FORWARDA;
 	uint32_t FORWARDB;
+	uint8_t flush;
 } CPU_Pipeline_Reg;
 
 

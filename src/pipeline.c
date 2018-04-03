@@ -3,6 +3,7 @@
 #include "pipeline.h"
 #include "memory.h"
 #include "Instructions.h"
+#include <string.h>
 
 void handle_pipeline()
 {
@@ -174,7 +175,7 @@ void WB()
 				break;
 			case BRANCH_TYPE:
 				// JALR			
-				if(MEM_WB.instr_data.opcode == 0x00 && MEM_WB.instr_data.subtable.opcode == 0x09){
+				if(MEM_WB.instr_data.opcode == 0x00 && MEM_WB.instr_data.subtable->opcode == 0x09){
 					NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 				
 				}
 				// JAL
