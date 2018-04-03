@@ -99,7 +99,13 @@ void EX()
 		// Write new value into ALUOutput
 		(*( EX_MEM.instr_data.funct ))( &ID_EX, &EX_MEM );
         
-        // TODO: IF Branch take action
+        // Flush if branch is taken
+        if( EX_MEM.flush )
+        {
+            memset( &IF_ID, 0, sizeof(CPU_Pipeline_Reg) );
+            memset( &ID_EX, 0, sizeof(CPU_Pipeline_Reg) );
+            EX_MEM.flush = 0;
+        }
 	}
 	
 	ID_EX.IR = 0;
@@ -139,7 +145,7 @@ void MEM()
 				break;
 			case REGISTER_TYPE:			/*	Do nothing	*/	break;
 			case SPECIAL_REGISTER_TYPE:	/*	Do nothing	*/	break;
-            case BRANCH_TYPE:           /*  DO nothing  */  break;
+            case BRANCH_TYPE:           /*  Do nothing  */  break;
 			default:					/*	Do nothing	*/	break;
 		}
 	}
