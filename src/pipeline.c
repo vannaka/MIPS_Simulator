@@ -40,7 +40,8 @@ void ID()
         
 		// Write new values in struct
         ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
-      ID_EX.IR = 0;  
+      	ID_EX.IR = 0; 
+ 
         // Check for control hazards
         STALL = checkControlHazard();
         
@@ -62,7 +63,8 @@ void ID()
 				case 2:		ID_EX.A = EX_MEM.ALUOutput2;		break;
 				case 3:		ID_EX.A = MEM_WB.ALUOutput;			break;
 				case 4:		ID_EX.A = MEM_WB.ALUOutput2;		break;	
-				case 5:		ID_EX.A = MEM_WB.LMD;				break;							
+				case 5:		ID_EX.A = MEM_WB.LMD;				break;
+				case 6: 	ID_EX.A = CURRENT_STATE.REGS[2];	break;						
 				default:	printf("\nERROR FORWARD A");		break;
 			}
 			switch(IF_ID.FORWARDB){
@@ -71,13 +73,14 @@ void ID()
 				case 2:		ID_EX.B = EX_MEM.ALUOutput2;		break;
 				case 3:		ID_EX.B = MEM_WB.ALUOutput;			break;
 				case 4:		ID_EX.B = MEM_WB.ALUOutput2;		break;	
-				case 5:		ID_EX.B = MEM_WB.LMD;				break;							
+				case 5:		ID_EX.B = MEM_WB.LMD;				break;
+				case 6: 	ID_EX.B = CURRENT_STATE.REGS[4];	break;							
 				default:	printf("\nERROR FORWARD B");		break;
 			}
             ID_EX.IMMED = (int32_t)immed;
 
 			printf("\nContents A: %08x, Forward Case: %d,",ID_EX.A, IF_ID.FORWARDA);
-			printf("\tContents B: %08x, Forward Case: %d,",ID_EX.B, IF_ID.FORWARDB);
+			printf("\tContents B: %08x, Forward Case: %d,\n",ID_EX.B, IF_ID.FORWARDB);
         }
         else
             printf("\nSTALLED");
@@ -134,7 +137,7 @@ void MEM()
 					case HALF_WORD: MEM_WB.LMD = 0xFFFF & mem_read_32(EX_MEM.ALUOutput);	break;
 					case WORD:		MEM_WB.LMD = mem_read_32(EX_MEM.ALUOutput);				break;
 					default: 		/*	Do nothing	*/										break;
-				}(*( EX_MEM.instr_data.funct ))( &ID_EX, &EX_MEM );
+				}//(*( EX_MEM.instr_data.funct ))( &ID_EX, &EX_MEM );
 				break;
 			case STORE_TYPE: 	
 				switch(EX_MEM.num_bytes){
@@ -175,7 +178,7 @@ void WB()
 				break;
 			case BRANCH_TYPE:
 				// JALR			
-				if(MEM_WB.instr_data.opcode == 0x00 && MEM_WB.instr_data.subtable->opcode == 0x09){
+				if(MEM_WB.instr_data.opcode == 0x00 && MEM_WB.instr_data.funct_code == 0x09){
 					NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 				
 				}
 				// JAL
@@ -195,7 +198,13 @@ void WB()
 uint8_t checkDataHazard()
 {
     uint8_t dest;
-    
+    uint8_t		bSysCallForward = (ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x0C);
+	
+	if(bSysCallForward){
+		IF_ID.FORWARDA = 6;
+		IF_ID.FORWARDB = 6;
+	}
+
     // Check for hazard with execute stage
     if( EX_MEM.instr_data.type == R_TYPE )
     {
@@ -209,10 +218,10 @@ uint8_t checkDataHazard()
         dest = 0;
     
     
-    if ( ( dest != 0 ) && ( dest == GET_RS( IF_ID.IR ) ) )
+    if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) )
         return 1;
     
-    if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) )
+    if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) )
         return 1;
     
     
@@ -228,10 +237,10 @@ uint8_t checkDataHazard()
     else
         dest = 0;
     
-    if ( ( dest != 0 ) && ( dest == GET_RS( IF_ID.IR ) ) )
+    if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) )
         return 1;
     
-    if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) )
+    if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) )
         return 1;
     
     return 0;
@@ -240,8 +249,10 @@ uint8_t checkDataHazard()
 
 uint8_t checkControlHazard()
 {
-    uint8_t fcode = ID_EX.instr_data.funct_code;
-    uint8_t opcode = ID_EX.instr_data.opcode;
+	if(EX_MEM.IR == 0)
+		return 0;
+    uint8_t fcode = EX_MEM.instr_data.funct_code;
+    uint8_t opcode = EX_MEM.instr_data.opcode;
     
    
     if( isBranch( opcode, fcode ) )
@@ -255,9 +266,15 @@ uint8_t checkForward()
 {
     uint8_t dest;
     
-	uint8_t 	bMultDivForward = ((EX_MEM.instr_data.opcode = 0x00) 
+	uint8_t 	bMultDivForward = ((EX_MEM.instr_data.opcode == 0x00) 
 								&& (((EX_MEM.instr_data.funct_code >= 0x18) && (EX_MEM.instr_data.funct_code <= 0x1B))
 								|| (EX_MEM.instr_data.funct_code == 0x11) || (EX_MEM.instr_data.funct_code == 0x13)));
+	uint8_t		bSysCallForward = (ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x0C);
+
+	if(bSysCallForward){
+		IF_ID.FORWARDA = 6;
+		IF_ID.FORWARDB = 6;
+	}
 
 	// Check for hazard with execute stage
 	if(!bMultDivForward) {
@@ -273,7 +290,7 @@ uint8_t checkForward()
 		    dest = 0;
 
 		// Check if destination register is same as first source		
-		if ( ( dest != 0 ) && ( dest == GET_RS( IF_ID.IR ) ) ) {
+		if ( ( dest != 0 ) && ( dest == ( (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) ) ){
 			if (EX_MEM.Control == LOAD_TYPE){
 				return 1;	// Stall
 			}
@@ -283,7 +300,7 @@ uint8_t checkForward()
 		}
 
 		// Check if destination register is same as second source
-		if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) ){
+		if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) ){
 			if (EX_MEM.Control == LOAD_TYPE){
 				return 1;	// Stall
 			}
@@ -301,7 +318,7 @@ uint8_t checkForward()
 	}
     
 
-	bMultDivForward = ((MEM_WB.instr_data.opcode = 0x00) 
+	bMultDivForward = ((MEM_WB.instr_data.opcode == 0x00) 
 								&& (((MEM_WB.instr_data.funct_code >= 0x18) && (MEM_WB.instr_data.funct_code <= 0x1B))
 								|| (MEM_WB.instr_data.funct_code == 0x11) || (MEM_WB.instr_data.funct_code == 0x13)));
 
@@ -319,7 +336,7 @@ uint8_t checkForward()
 		    dest = 0;
 		
 		// Check if destination register is same as first source
-		if ( ( dest != 0 ) && ( dest == GET_RS( IF_ID.IR ) ) ){
+		if ( ( dest != 0 ) && ( dest == ( (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) ) ) {
 			if (EX_MEM.Control == LOAD_TYPE){
 				IF_ID.FORWARDA = 5;	// Case of forwarding LMD from memory
 			}
@@ -329,7 +346,7 @@ uint8_t checkForward()
 		}
 		
 		// Check if destination register is same as second source
-		if ( ( dest != 0 ) && ( dest == GET_RT( IF_ID.IR ) ) ){
+		if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) ){
 			if (EX_MEM.Control == LOAD_TYPE){
 				IF_ID.FORWARDB = 5;	// Case of forwarding LMD from memory
 			}

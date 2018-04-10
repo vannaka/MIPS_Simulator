@@ -5,6 +5,13 @@
 #include "mu-mips.h"
 #include "memory.h"
 #include "pipeline.h"
+
+uint8_t isBranch(uint8_t op, uint8_t func){
+		return ( ( op == 0x01 ) || 
+								( op <= 0x07 && op >= 0x02) || 
+								( ( op == 0x00 ) && ( func == 0x08 || func == 0x09 ) ) );
+}
+
 mips_instr_t opcode_0x00_table[0x2A + 1] =
 {
 			// Name			type	OCode	FCode	Makeup			FPtr	                SubTable
@@ -208,8 +215,8 @@ void instr_handler_SYSCALL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	int32_t v0_val;
 	int32_t a0_val;
 
-	v0_val = CURRENT_STATE.REGS[2];
-	a0_val = CURRENT_STATE.REGS[4];
+	v0_val = (*ID_EX).A; //CURRENT_STATE.REGS[2];
+	a0_val = (*ID_EX).B; //CURRENT_STATE.REGS[4];
 	switch( v0_val ) {
 		case 0x01:	printf("%d\n", a0_val);		break;	// print integer
 		case 0x0A:	WB(); RUN_FLAG = 0;			break;	// exit program
