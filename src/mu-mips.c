@@ -8,6 +8,7 @@
 #include "Instructions.h"
 #include "memory.h"
 #include "pipeline.h"
+#include "mu-cache.h"
 
 /***************************************************************/
 /* Print out a list of commands available                      */
@@ -239,6 +240,7 @@ void reset()
 	memset( &ID_EX, 0, sizeof(CPU_Pipeline_Reg) );
 	memset( &EX_MEM, 0, sizeof(CPU_Pipeline_Reg) );
 	memset( &MEM_WB, 0, sizeof(CPU_Pipeline_Reg) );
+    memset( &L1Cache, 0, sizeof(Cache) );
 
 	/*load program*/
 	load_program();
@@ -248,6 +250,8 @@ void reset()
 	CURRENT_STATE.PC =  MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
 	RUN_FLAG = true;
+    cache_misses = 0;
+    cache_hits = 0;
 }
 
 
@@ -311,6 +315,8 @@ void initialize()
 	CURRENT_STATE.PC = MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
 	RUN_FLAG = true;
+    cache_misses = 0;
+    cache_hits = 0;
 }
 
 
