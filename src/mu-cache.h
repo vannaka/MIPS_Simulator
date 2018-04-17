@@ -4,6 +4,11 @@
 #define NUM_CACHE_BLOCKS 16
 #define WORD_PER_BLOCK 4
 
+#define GETINDEX(x)     ( x >> 4 ) & 0x0F
+#define GETTAG(x)       ( x >> 8 ) & 0xFFFFFF
+#define GETBYTEOFF(x)   ( x & 0x03 )
+#define GETBLOCKOFF(x)  ( x >> 2 ) & 0x03
+
 
 typedef struct CacheBlock_Struct {
 
