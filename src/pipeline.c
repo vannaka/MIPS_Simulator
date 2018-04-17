@@ -234,7 +234,18 @@ uint32_t SetCacheValue(uint32_t address, uint32_t value){
 }
 
 void LoadCache(uint32_t address){
-
+    uint8_t index = GETINDEX( address );
+    uint32_t tag = GETTAG( address );
+    
+    uint32_t base_addr = address & 0xFFFFFFF0
+    
+    L1Cache.blocks[index].words[0] = mem_read_32( base_addr );
+    L1Cache.blocks[index].words[1] = mem_read_32( base_addr + 4 );
+    L1Cache.blocks[index].words[2] = mem_read_32( base_addr + 8 );
+    L1Cache.blocks[index].words[3] = mem_read_32( base_addr + 12 );
+    
+    L1Cache.blocks[index].valid = 1;
+    L1Cache.blocks[index].tag = tag;
 }
 
 void HandleLoadCache(){
