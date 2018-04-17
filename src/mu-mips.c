@@ -66,8 +66,10 @@ void run( int num_cycles )
 			printf("Simulation Stopped.\n\n");
 			break;
 		}
-		printf( "[0x%x]\t", CURRENT_STATE.PC );
-		print_instruction( CURRENT_STATE.PC );
+		if(MEM_STALL == 0) {
+			printf( "[0x%x]\t", CURRENT_STATE.PC );
+			print_instruction( CURRENT_STATE.PC );
+		}
 		cycle();
 	}
 }
