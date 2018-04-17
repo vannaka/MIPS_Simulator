@@ -244,7 +244,7 @@ void LoadCache(uint32_t address){
     uint8_t index = GETINDEX( address );
     uint32_t tag = GETTAG( address );
     
-    uint32_t base_addr = address & 0xFFFFFFF0
+    uint32_t base_addr = address & 0xFFFFFFF0;
     
     L1Cache.blocks[index].words[0] = mem_read_32( base_addr );
     L1Cache.blocks[index].words[1] = mem_read_32( base_addr + 4 );

@@ -63,5 +63,10 @@ void print_program();
 uint8_t checkDataHazard();
 uint8_t checkControlHazard();
 uint8_t checkForward();
-
+uint8_t CheckInCache(uint32_t address);
+uint32_t GetCacheValue(uint32_t address);
+void SetCacheValue(uint32_t address, uint32_t value);
+void LoadCache(uint32_t address);
+void HandleLoadCache();
+void HandleStoreCache();
 #endif
