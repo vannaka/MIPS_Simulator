@@ -21,113 +21,119 @@ void handle_pipeline()
 
 void IF()
 {   
-    if( !DATA_STALL && !CONTROL_STALL)
-    {
-        // Write new values in struct 
-        IF_ID.IR = mem_read_32( CURRENT_STATE.PC );
-        IF_ID.PC = CURRENT_STATE.PC;
-		if(!JUMPED)
-			NEXT_STATE.PC = CURRENT_STATE.PC + 4;
-    }
+	if(MEM_STALL <= 0) {
+		if( !DATA_STALL && !CONTROL_STALL)
+		{
+		    // Write new values in struct 
+		    IF_ID.IR = mem_read_32( CURRENT_STATE.PC );
+		    IF_ID.PC = CURRENT_STATE.PC;
+			if(!JUMPED)
+				NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+		}
+	}
 }
 
 void ID()
 {
-	if( IF_ID.IR != 0 ) {
-		uint8_t rs, rt;
-		int16_t immed;
+	if(MEM_STALL <= 0) {
+		if( IF_ID.IR != 0 ) {
+			uint8_t rs, rt;
+			int16_t immed;
 		
-		// Get new values for struct
-		rs = GET_RS( IF_ID.IR );
-		rt = GET_RT( IF_ID.IR );
-		immed = GET_IMMED( IF_ID.IR );
-        
-		// Write new values in struct
-        ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
-      	ID_EX.IR = 0; 
+			// Get new values for struct
+			rs = GET_RS( IF_ID.IR );
+			rt = GET_RT( IF_ID.IR );
+			immed = GET_IMMED( IF_ID.IR );
+		    
+			// Write new values in struct
+		    ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
+		  	ID_EX.IR = 0; 
 
-        //Check for data hazards
-		if(!ENABLE_FORWARDING)
-        	DATA_STALL = checkDataHazard();
-		else
-			DATA_STALL = checkForward();
+		    //Check for data hazards
+			if(!ENABLE_FORWARDING)
+		    	DATA_STALL = checkDataHazard();
+			else
+				DATA_STALL = checkForward();
 
-        if( !DATA_STALL )
-        {
-            // Pass on values
-            ID_EX.PC = IF_ID.PC;
-            ID_EX.IR = IF_ID.IR;
-            
-			switch(IF_ID.FORWARDA){
-            	case 0: 	ID_EX.A = CURRENT_STATE.REGS[rs];	break;
-				case 1:		ID_EX.A = EX_MEM.ALUOutput;			break;
-				case 2:		ID_EX.A = EX_MEM.ALUOutput2;		break;
-				case 3:		ID_EX.A = MEM_WB.ALUOutput;			break;
-				case 4:		ID_EX.A = MEM_WB.ALUOutput2;		break;	
-				case 5:		ID_EX.A = MEM_WB.LMD;				break;
-				case 6: 	ID_EX.A = CURRENT_STATE.REGS[2];	break;
-				case 7:		ID_EX.A = CURRENT_STATE.LO;			break;
-				case 8:		ID_EX.A = CURRENT_STATE.HI;			break;		
-				default:	printf("\nERROR FORWARD A");		break;
-			}
-			switch(IF_ID.FORWARDB){
-            	case 0: 	ID_EX.B = CURRENT_STATE.REGS[rt];	break;
-				case 1:		ID_EX.B = EX_MEM.ALUOutput;			break;
-				case 2:		ID_EX.B = EX_MEM.ALUOutput2;		break;
-				case 3:		ID_EX.B = MEM_WB.ALUOutput;			break;
-				case 4:		ID_EX.B = MEM_WB.ALUOutput2;		break;	
-				case 5:		ID_EX.B = MEM_WB.LMD;				break;
-				case 6: 	ID_EX.B = CURRENT_STATE.REGS[4];	break;
-				case 7:		ID_EX.B = CURRENT_STATE.LO;			break;
-				case 8:		ID_EX.B = CURRENT_STATE.HI;			break;								
-				default:	printf("\nERROR FORWARD B");		break;
-			}
-            ID_EX.IMMED = (int32_t)immed;
+		    if( !DATA_STALL )
+		    {
+		        // Pass on values
+		        ID_EX.PC = IF_ID.PC;
+		        ID_EX.IR = IF_ID.IR;
+		        
+				switch(IF_ID.FORWARDA){
+		        	case 0: 	ID_EX.A = CURRENT_STATE.REGS[rs];	break;
+					case 1:		ID_EX.A = EX_MEM.ALUOutput;			break;
+					case 2:		ID_EX.A = EX_MEM.ALUOutput2;		break;
+					case 3:		ID_EX.A = MEM_WB.ALUOutput;			break;
+					case 4:		ID_EX.A = MEM_WB.ALUOutput2;		break;	
+					case 5:		ID_EX.A = MEM_WB.LMD;				break;
+					case 6: 	ID_EX.A = CURRENT_STATE.REGS[2];	break;
+					case 7:		ID_EX.A = CURRENT_STATE.LO;			break;
+					case 8:		ID_EX.A = CURRENT_STATE.HI;			break;		
+					default:	printf("\nERROR FORWARD A");		break;
+				}
+				switch(IF_ID.FORWARDB){
+		        	case 0: 	ID_EX.B = CURRENT_STATE.REGS[rt];	break;
+					case 1:		ID_EX.B = EX_MEM.ALUOutput;			break;
+					case 2:		ID_EX.B = EX_MEM.ALUOutput2;		break;
+					case 3:		ID_EX.B = MEM_WB.ALUOutput;			break;
+					case 4:		ID_EX.B = MEM_WB.ALUOutput2;		break;	
+					case 5:		ID_EX.B = MEM_WB.LMD;				break;
+					case 6: 	ID_EX.B = CURRENT_STATE.REGS[4];	break;
+					case 7:		ID_EX.B = CURRENT_STATE.LO;			break;
+					case 8:		ID_EX.B = CURRENT_STATE.HI;			break;								
+					default:	printf("\nERROR FORWARD B");		break;
+				}
+		        ID_EX.IMMED = (int32_t)immed;
 
 			
-			//printf("\nContents A: %08x, Forward Case: %d,",ID_EX.A, IF_ID.FORWARDA);
-			//printf("\tContents B: %08x, Forward Case: %d,\n",ID_EX.B, IF_ID.FORWARDB);
+				//printf("\nContents A: %08x, Forward Case: %d,",ID_EX.A, IF_ID.FORWARDA);
+				//printf("\tContents B: %08x, Forward Case: %d,\n",ID_EX.B, IF_ID.FORWARDB);
 
- 			// Check for control hazards
-        	CONTROL_STALL = checkControlHazard();
-        }
-		 
-       
+	 			// Check for control hazards
+		    	CONTROL_STALL = checkControlHazard();
+		    }
+			 
+		   
+		}
+		else
+			printf("---------flush---------\n");
+
+		IF_ID.FORWARDA = 0;
+		IF_ID.FORWARDB = 0;
+		IF_ID.A = 0;
+		IF_ID.B = 0;
 	}
-	else
-		printf("---------flush---------\n");
-
-	IF_ID.FORWARDA = 0;
-	IF_ID.FORWARDB = 0;
-	IF_ID.A = 0;
-	IF_ID.B = 0;
 }
 
 void EX()
 {
-	if( ID_EX.IR != 0 ) {
-		// Pass on values
-		EX_MEM.PC = ID_EX.PC;
-		EX_MEM.IR = ID_EX.IR;
-		EX_MEM.A = ID_EX.A;
-		EX_MEM.B = ID_EX.B;
-		EX_MEM.IMMED = ID_EX.IMMED;
-		EX_MEM.instr_data = ID_EX.instr_data;
+	if(MEM_STALL <= 0) {
+		if( ID_EX.IR != 0 ) {
+			// Pass on values
+			EX_MEM.PC = ID_EX.PC;
+			EX_MEM.IR = ID_EX.IR;
+			EX_MEM.A = ID_EX.A;
+			EX_MEM.B = ID_EX.B;
+			EX_MEM.IMMED = ID_EX.IMMED;
+			EX_MEM.instr_data = ID_EX.instr_data;
 	
-		// Write new value into ALUOutput
-		(*( EX_MEM.instr_data.funct ))( &ID_EX, &EX_MEM );
-        
-        // Flush if branch is taken
-        if( EX_MEM.flush )
-        {
-            memset( &IF_ID, 0, sizeof(CPU_Pipeline_Reg) );
-            memset( &ID_EX, 0, sizeof(CPU_Pipeline_Reg) );
-            EX_MEM.flush = 0;
-			CURRENT_STATE = NEXT_STATE;
-        }
+			// Write new value into ALUOutput
+			(*( EX_MEM.instr_data.funct ))( &ID_EX, &EX_MEM );
+		    
+		    // Flush if branch is taken
+		    if( EX_MEM.flush )
+		    {
+		        memset( &IF_ID, 0, sizeof(CPU_Pipeline_Reg) );
+		        memset( &ID_EX, 0, sizeof(CPU_Pipeline_Reg) );
+		        EX_MEM.flush = 0;
+				CURRENT_STATE = NEXT_STATE;
+		    }
+		}
+	
+		ID_EX.IR = 0;
 	}
-	
-	ID_EX.IR = 0;
 }
 
 void MEM()
@@ -146,21 +152,11 @@ void MEM()
 
 		// Write new values dependent upon control type
 		switch(EX_MEM.Control){
-			case LOAD_TYPE: 	
-				switch(MEM_WB.num_bytes){					
-					case BYTE: 		MEM_WB.LMD = 0x00FF & mem_read_32(EX_MEM.ALUOutput);	break;
-					case HALF_WORD: MEM_WB.LMD = 0xFFFF & mem_read_32(EX_MEM.ALUOutput);	break;
-					case WORD:		MEM_WB.LMD = mem_read_32(EX_MEM.ALUOutput);				break;
-					default: 		/*	Do nothing	*/										break;
-				}//(*( EX_MEM.instr_data.funct ))( &ID_EX, &EX_MEM );
+			case LOAD_TYPE:
+				HandleLoadCache(); 	
 				break;
-			case STORE_TYPE: 	
-				switch(EX_MEM.num_bytes){
-					case BYTE:		mem_write_32(EX_MEM.ALUOutput, 0x00FF & EX_MEM.B); 		break;
-					case HALF_WORD: mem_write_32(EX_MEM.ALUOutput, 0xFFFF & EX_MEM.B); 		break;			
-					case WORD: 		mem_write_32(EX_MEM.ALUOutput, EX_MEM.B); 				break;
-					default: 		/*	Do nothing	*/										break;				
-				}
+			case STORE_TYPE: 
+				HandleStoreCache();	
 				break;
 			case REGISTER_TYPE:			/*	Do nothing	*/	break;
 			case SPECIAL_REGISTER_TYPE:	/*	Do nothing	*/	break;
@@ -223,6 +219,43 @@ void WB()
    
     // Update at end of cycle
     CURRENT_STATE = NEXT_STATE;
+}
+
+uint8_t CheckInCache(uint32_t address){
+	return 1;
+}
+
+void HandleLoadCache(){
+
+		if(MEM_STALL <= 0){
+			uint8_t bHitOrMiss = CheckInCache(EX_MEM.ALUOutput);
+			uint32_t WriteBuffer;
+			if(bHitOrMiss){
+				MEM_STALL = 0;
+				WriteBuffer = GetCacheValue(EX_MEM.ALUOutput);
+			}
+			else{
+				MEM_STALL = 100;
+			}
+			switch(MEM_WB.num_bytes){					
+				case BYTE: 		MEM_WB.LMD = 0x00FF & WriteBuffer;	break;
+				case HALF_WORD: MEM_WB.LMD = 0xFFFF & WriteBuffer;	break;
+				case WORD:		MEM_WB.LMD = WriteBuffer;			break;
+				default: 		/*	Do nothing	*/										break;
+			}
+		}
+		else
+			MEM_STALL--;
+}
+
+void HandleStoreCache(){
+		uint8_t bHitOrMiss = CheckInCache(EX_MEM.ALUOutput);
+		switch(EX_MEM.num_bytes){
+			case BYTE:		mem_write_32(EX_MEM.ALUOutput, 0x00FF & EX_MEM.B); 		break;
+			case HALF_WORD: mem_write_32(EX_MEM.ALUOutput, 0xFFFF & EX_MEM.B); 		break;			
+			case WORD: 		mem_write_32(EX_MEM.ALUOutput, EX_MEM.B); 				break;
+			default: 		/*	Do nothing	*/										break;				
+		}
 }
 
 uint8_t isSysCallForward()
