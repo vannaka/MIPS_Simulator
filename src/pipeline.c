@@ -227,11 +227,11 @@ uint8_t CheckInCache(uint32_t address){
 }
 
 uint32_t GetCacheValue(uint32_t address){
-
+	return L1Cache.blocks[GETINDEX(address)].words[GETBLOCKOFF(address)];
 }
 
-uint32_t SetCacheValue(uint32_t address, uint32_t value){
-
+void SetCacheValue(uint32_t address, uint32_t value){
+	L1Cache.blocks[GETINDEX(address)].words[GETBLOCKOFF(address)] = value;
 }
 
 void LoadCache(uint32_t address){
@@ -289,6 +289,8 @@ void HandleStoreCache(){
 				MEM_STALL = 100;
 			}
 		}
+		else 
+			MEM_STALL--;
 }
 
 uint8_t isSysCallForward()
