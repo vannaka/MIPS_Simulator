@@ -84,8 +84,8 @@ void ID()
             ID_EX.IMMED = (int32_t)immed;
 
 			
-			printf("\nContents A: %08x, Forward Case: %d,",ID_EX.A, IF_ID.FORWARDA);
-			printf("\tContents B: %08x, Forward Case: %d,\n",ID_EX.B, IF_ID.FORWARDB);
+			//printf("\nContents A: %08x, Forward Case: %d,",ID_EX.A, IF_ID.FORWARDA);
+			//printf("\tContents B: %08x, Forward Case: %d,\n",ID_EX.B, IF_ID.FORWARDB);
 
  			// Check for control hazards
         	CONTROL_STALL = checkControlHazard();
