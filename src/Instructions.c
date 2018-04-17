@@ -153,7 +153,7 @@ void instr_handler_SLL( CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM )
     sa = ( (*EX_MEM).IMMED >> 6 ) & 0x1F;
     
     // Shift Left Logical Register Contents A by sa bits
-	(*EX_MEM).ALUOutput = (*ID_EX).A << sa;
+	(*EX_MEM).ALUOutput = (*ID_EX).B << sa;
 	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
@@ -164,7 +164,7 @@ void instr_handler_SRL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
     sa = ( (*EX_MEM).IMMED >> 6 ) & 0x1F;
     
     // Shift Right Logical Register Contents A by sa bits
-	(*EX_MEM).ALUOutput = (*ID_EX).A >> sa;
+	(*EX_MEM).ALUOutput = (*ID_EX).B >> sa;
 	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
@@ -176,7 +176,7 @@ void instr_handler_SRA( CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM )
     sa = ( (*EX_MEM).IMMED >> 6 ) & 0x1F;
     
     // Shift Right Logical Register Contents A by sa bits
-	(*EX_MEM).ALUOutput = (int32_t)(*ID_EX).A >> sa;
+	(*EX_MEM).ALUOutput = (int32_t)(*ID_EX).B >> sa;
 	(*EX_MEM).Control = REGISTER_TYPE;
 }
 
@@ -235,7 +235,7 @@ void instr_handler_SYSCALL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_MFHI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	//set ALUOutput to the HI value
-	(*EX_MEM).ALUOutput = CURRENT_STATE.HI;
+	(*EX_MEM).ALUOutput = (*ID_EX).A; //CURRENT_STATE.HI;
 	//set type as register
 	(*EX_MEM).Control = REGISTER_TYPE;
     
@@ -248,7 +248,7 @@ void instr_handler_MTHI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	//set ALUOutput2 to rs
 	(*EX_MEM).ALUOutput2 = (int32_t)((int32_t)(*ID_EX).A);
 	//set ALUOutput to current low state to not get overwritten
-	(*EX_MEM).ALUOutput = CURRENT_STATE.LO;
+	(*EX_MEM).ALUOutput = (*ID_EX).B; //CURRENT_STATE.LO;
 	//set type as special register
 	(*EX_MEM).Control = SPECIAL_REGISTER_TYPE;
     
@@ -260,7 +260,7 @@ void instr_handler_MTHI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_MFLO(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	//set ALUOutput to the LO value
-	(*EX_MEM).ALUOutput = CURRENT_STATE.LO;
+	(*EX_MEM).ALUOutput = (*ID_EX).A; //CURRENT_STATE.LO;
 	//set type as register
 	(*EX_MEM).Control = REGISTER_TYPE;
     
@@ -273,7 +273,7 @@ void instr_handler_MTLO(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	//set ALUOutput to rs
 	(*EX_MEM).ALUOutput = (int32_t)((int32_t)(*ID_EX).A);
 	//set ALUOutput2 to current high state to not get overwritten
-	(*EX_MEM).ALUOutput2 = CURRENT_STATE.HI;
+	(*EX_MEM).ALUOutput2 = (*ID_EX).B; //CURRENT_STATE.HI;
 	//set type as special register
 	(*EX_MEM).Control = SPECIAL_REGISTER_TYPE;
 	

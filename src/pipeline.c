@@ -25,7 +25,8 @@ void IF()
         // Write new values in struct 
         IF_ID.IR = mem_read_32( CURRENT_STATE.PC );
         IF_ID.PC = CURRENT_STATE.PC;
-		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+		if(!JUMPED)
+			NEXT_STATE.PC = CURRENT_STATE.PC + 4;
     }
 }
 
@@ -63,7 +64,9 @@ void ID()
 				case 3:		ID_EX.A = MEM_WB.ALUOutput;			break;
 				case 4:		ID_EX.A = MEM_WB.ALUOutput2;		break;	
 				case 5:		ID_EX.A = MEM_WB.LMD;				break;
-				case 6: 	ID_EX.A = CURRENT_STATE.REGS[2];	break;						
+				case 6: 	ID_EX.A = CURRENT_STATE.REGS[2];	break;
+				case 7:		ID_EX.A = CURRENT_STATE.LO;			break;
+				case 8:		ID_EX.A = CURRENT_STATE.HI;			break;		
 				default:	printf("\nERROR FORWARD A");		break;
 			}
 			switch(IF_ID.FORWARDB){
@@ -73,13 +76,16 @@ void ID()
 				case 3:		ID_EX.B = MEM_WB.ALUOutput;			break;
 				case 4:		ID_EX.B = MEM_WB.ALUOutput2;		break;	
 				case 5:		ID_EX.B = MEM_WB.LMD;				break;
-				case 6: 	ID_EX.B = CURRENT_STATE.REGS[4];	break;							
+				case 6: 	ID_EX.B = CURRENT_STATE.REGS[4];	break;
+				case 7:		ID_EX.B = CURRENT_STATE.LO;			break;
+				case 8:		ID_EX.B = CURRENT_STATE.HI;			break;								
 				default:	printf("\nERROR FORWARD B");		break;
 			}
             ID_EX.IMMED = (int32_t)immed;
 
-			//printf("\nContents A: %08x, Forward Case: %d,",ID_EX.A, IF_ID.FORWARDA);
-			//printf("\tContents B: %08x, Forward Case: %d,\n",ID_EX.B, IF_ID.FORWARDB);
+			
+			printf("\nContents A: %08x, Forward Case: %d,",ID_EX.A, IF_ID.FORWARDA);
+			printf("\tContents B: %08x, Forward Case: %d,\n",ID_EX.B, IF_ID.FORWARDB);
 
  			// Check for control hazards
         	CONTROL_STALL = checkControlHazard();
@@ -92,6 +98,8 @@ void ID()
 
 	IF_ID.FORWARDA = 0;
 	IF_ID.FORWARDB = 0;
+	IF_ID.A = 0;
+	IF_ID.B = 0;
 }
 
 void EX()
@@ -102,6 +110,7 @@ void EX()
 		EX_MEM.IR = ID_EX.IR;
 		EX_MEM.A = ID_EX.A;
 		EX_MEM.B = ID_EX.B;
+		EX_MEM.IMMED = ID_EX.IMMED;
 		EX_MEM.instr_data = ID_EX.instr_data;
 	
 		// Write new value into ALUOutput
@@ -168,27 +177,42 @@ void WB()
 	if( MEM_WB.IR != 0 ) {
 		// Write new values dependent upon control type
 		switch(MEM_WB.Control){
-			case LOAD_TYPE:			NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.LMD;			break;
+			case LOAD_TYPE:			NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.LMD;			
+					//printf("\nReg: %s with %08x",mips_reg_names[GET_RT( MEM_WB.IR )], MEM_WB.LMD); 								
+					//printf("\tA: %08x B: %08x IR:%08x",MEM_WB.A, MEM_WB.B, MEM_WB.IR);
+					break;
 			case STORE_TYPE: 		/*	Do nothing	*/								 			break;
 			case REGISTER_TYPE: 
 				switch(MEM_WB.instr_data.type){
-					case R_TYPE: 	NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 	break;
-					case I_TYPE: 	NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.ALUOutput; 	break;
+					case R_TYPE: 	NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 	
+						//printf("\nReg: %s with %08x",mips_reg_names[GET_RD( MEM_WB.IR )], MEM_WB.ALUOutput);
+						break;
+					case I_TYPE: 	NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.ALUOutput; 	
+						//printf("\nReg: %s with %08x",mips_reg_names[GET_RT( MEM_WB.IR )], MEM_WB.ALUOutput);
+						break;
 					default:		/*	Do nothing	*/					 						break;
 				}
+				//printf("\tA: %08x B: %08x IR:%08x",MEM_WB.A, MEM_WB.B, MEM_WB.IR);
 				break;
 			case SPECIAL_REGISTER_TYPE:
 				NEXT_STATE.LO = MEM_WB.ALUOutput;
 				NEXT_STATE.HI = MEM_WB.ALUOutput2;
+				//printf("\nReg: %s with %08x","LO", MEM_WB.ALUOutput);
+				//printf("\nReg: %s with %08x","HI", MEM_WB.ALUOutput2);
+				//printf("\tA: %08x B: %08x IR:%08x",MEM_WB.A, MEM_WB.B, MEM_WB.IR);
 				break;
 			case BRANCH_TYPE:
 				// JALR			
 				if(MEM_WB.instr_data.opcode == 0x00 && MEM_WB.instr_data.funct_code == 0x09){
-					NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 				
+					NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 
+					//printf("\nReg: %s with %08x",mips_reg_names[GET_RD( MEM_WB.IR )], MEM_WB.ALUOutput);	
+					//printf("\tA: %08x B: %08x IR:%08x",MEM_WB.A, MEM_WB.B, MEM_WB.IR);			
 				}
 				// JAL
 				else if(MEM_WB.instr_data.opcode == 0x03){
 					NEXT_STATE.REGS[31] = MEM_WB.ALUOutput;
+					//printf("\nReg: %s with %08x",mips_reg_names[31], MEM_WB.ALUOutput);
+					//printf("\tA: %08x B: %08x IR:%08x",MEM_WB.A, MEM_WB.B, MEM_WB.IR);
 				}
 			default:				/*	Do nothing	*/	break;
 		}
@@ -200,54 +224,95 @@ void WB()
     CURRENT_STATE = NEXT_STATE;
 }
 
+uint8_t isSysCallForward()
+{
+	return (ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x0C);
+}
+
 uint8_t checkDataHazard()
 {
     uint8_t dest;
-    uint8_t		bSysCallForward = (ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x0C);
+	uint8_t 	bMultDivForward = ((EX_MEM.IR != 0) && (EX_MEM.instr_data.opcode == 0x00) 
+								&& (((EX_MEM.instr_data.funct_code >= 0x18) && (EX_MEM.instr_data.funct_code <= 0x1B))
+								|| (EX_MEM.instr_data.funct_code == 0x11) || (EX_MEM.instr_data.funct_code == 0x13)));
+    uint8_t		bSysCallForward = isSysCallForward();
 	
 	if(bSysCallForward){
 		IF_ID.FORWARDA = 6;
 		IF_ID.FORWARDB = 6;
 	}
+	else if(ID_EX.instr_data.funct_code == 0x10){
+		IF_ID.FORWARDA = 8;
+	}
+	else if(ID_EX.instr_data.funct_code == 0x11){
+		IF_ID.FORWARDB = 7;
+	}
+	else if(ID_EX.instr_data.funct_code == 0x12){
+		IF_ID.FORWARDA = 7;
+	}
+	else if(ID_EX.instr_data.funct_code == 0x13){
+		IF_ID.FORWARDB = 8;
+	}
 
-    // Check for hazard with execute stage
-    if( EX_MEM.instr_data.type == R_TYPE )
-    {
-        dest = GET_RD( EX_MEM.IR );
+	if(!bMultDivForward){
+		// Check for hazard with execute stage
+		if( EX_MEM.instr_data.type == R_TYPE )
+		{
+		    dest = GET_RD( EX_MEM.IR );
+		}
+		else if( EX_MEM.instr_data.type == I_TYPE )
+		{
+		    dest = GET_RT( EX_MEM.IR );
+		}
+		else if( EX_MEM.instr_data.opcode == 0x03)
+			dest = 31;
+		else
+		    dest = 0;
+		
+		
+		if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) )
+		    return 1;
+		
+		if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) )
+		    return 1;
     }
-    else if( EX_MEM.instr_data.type == I_TYPE )
-    {
-        dest = GET_RT( EX_MEM.IR );
+    else{
+		// If ex_mem has a mult or div instruction running and we need to stall for high or low
+		if((ID_EX.instr_data.funct_code >= 0x10) && (ID_EX.instr_data.funct_code <= 0x13))
+			return 1;
+	}
+
+	bMultDivForward = ((MEM_WB.IR!=0) && (MEM_WB.instr_data.opcode == 0x00) 
+								&& (((MEM_WB.instr_data.funct_code >= 0x18) && (MEM_WB.instr_data.funct_code <= 0x1B))
+								|| (MEM_WB.instr_data.funct_code == 0x11) || (MEM_WB.instr_data.funct_code == 0x13)));
+
+	if(!bMultDivForward){
+		// Check for hazazrd with Memory stage
+		if( MEM_WB.instr_data.type == R_TYPE )
+		{
+		    dest = GET_RD( MEM_WB.IR );
+		}
+		else if( MEM_WB.instr_data.type == I_TYPE )
+		{
+		    dest = GET_RT( MEM_WB.IR );
+		}
+		else if( MEM_WB.instr_data.opcode == 0x03)
+			dest = 31;
+		else
+		    dest = 0;
+		
+		if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) )
+		    return 1;
+		
+		if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) )
+		    return 1;
     }
-    else
-        dest = 0;
-    
-    
-    if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) )
-        return 1;
-    
-    if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) )
-        return 1;
-    
-    
-    // Check for hazazrd with Memory stage
-    if( MEM_WB.instr_data.type == R_TYPE )
-    {
-        dest = GET_RD( MEM_WB.IR );
-    }
-    else if( MEM_WB.instr_data.type == I_TYPE )
-    {
-        dest = GET_RT( MEM_WB.IR );
-    }
-    else
-        dest = 0;
-    
-    if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) )
-        return 1;
-    
-    if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) )
-        return 1;
-    
+	else{
+		// If MEM_WB has a mult or div instruction running and we need to stall from high or low
+		if((ID_EX.instr_data.funct_code >= 0x10) && (ID_EX.instr_data.funct_code <= 0x13))
+			return 1;
+	}
+
     return 0;
 }
 
@@ -269,59 +334,27 @@ uint8_t checkForward()
 {
     uint8_t dest;
     
-	uint8_t 	bMultDivForward = ((EX_MEM.instr_data.opcode == 0x00) 
-								&& (((EX_MEM.instr_data.funct_code >= 0x18) && (EX_MEM.instr_data.funct_code <= 0x1B))
-								|| (EX_MEM.instr_data.funct_code == 0x11) || (EX_MEM.instr_data.funct_code == 0x13)));
-	uint8_t		bSysCallForward = (ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x0C);
+	uint8_t		bSysCallForward = isSysCallForward();
 
 	if(bSysCallForward){
 		IF_ID.FORWARDA = 6;
 		IF_ID.FORWARDB = 6;
 	}
-
-	// Check for hazard with execute stage
-	if(!bMultDivForward) {
-		if( EX_MEM.instr_data.type == R_TYPE )
-		{
-		    dest = GET_RD( EX_MEM.IR );
-		}
-		else if( EX_MEM.instr_data.type == I_TYPE )
-		{
-		    dest = GET_RT( EX_MEM.IR );
-		}
-		else
-		    dest = 0;
-
-		// Check if destination register is same as first source		
-		if ( ( dest != 0 ) && ( dest == ( (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) ) ){
-			if (EX_MEM.Control == LOAD_TYPE){
-				return 1;	// Stall
-			}
-			else{	
-				IF_ID.FORWARDA = 1;		// Case of forwarding ALUOutput from execute
-			}
-		}
-
-		// Check if destination register is same as second source
-		if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) ){
-			if (EX_MEM.Control == LOAD_TYPE){
-				return 1;	// Stall
-			}
-			else{	
-				IF_ID.FORWARDB = 1;	// Case of forwarding ALUOutput from execute	
-			}
-		}
+	else if(ID_EX.instr_data.funct_code == 0x10){
+		IF_ID.FORWARDA = 8;
 	}
-	else {
-		// If ex_mem has a mult or div instruction running and we need to forward to move from high or low
-		if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x10))
-			IF_ID.FORWARDA = 2;	// Case of forwarding ALUOutput2 from execute
-		else if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x12))	
-			IF_ID.FORWARDA = 1;	// Case of forwarding ALUOutput from execute
+	else if(ID_EX.instr_data.funct_code == 0x11){
+		IF_ID.FORWARDB = 7;
 	}
-    
+	else if(ID_EX.instr_data.funct_code == 0x12){
+		IF_ID.FORWARDA = 7;
+	}
+	else if(ID_EX.instr_data.funct_code == 0x13){
+		IF_ID.FORWARDB = 8;
+	}
 
-	bMultDivForward = ((MEM_WB.instr_data.opcode == 0x00) 
+
+	uint8_t bMultDivForward = ((MEM_WB.IR != 0) && (MEM_WB.instr_data.opcode == 0x00) 
 								&& (((MEM_WB.instr_data.funct_code >= 0x18) && (MEM_WB.instr_data.funct_code <= 0x1B))
 								|| (MEM_WB.instr_data.funct_code == 0x11) || (MEM_WB.instr_data.funct_code == 0x13)));
 
@@ -335,36 +368,114 @@ uint8_t checkForward()
 		{
 		    dest = GET_RT( MEM_WB.IR );
 		}
+		else if( MEM_WB.instr_data.opcode == 0x03)
+			dest = 31;
 		else
 		    dest = 0;
 		
 		// Check if destination register is same as first source
 		if ( ( dest != 0 ) && ( dest == ( (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) ) ) {
-			if (EX_MEM.Control == LOAD_TYPE){
+			if (MEM_WB.Control == LOAD_TYPE){
 				IF_ID.FORWARDA = 5;	// Case of forwarding LMD from memory
 			}
-			else{	
+			else if(MEM_WB.Control!= STORE_TYPE){	
 				IF_ID.FORWARDA = 3;	// Case of forwarding Aluoutput from memory
 			}
 		}
 		
 		// Check if destination register is same as second source
 		if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) ){
-			if (EX_MEM.Control == LOAD_TYPE){
+			if (MEM_WB.Control == LOAD_TYPE){
 				IF_ID.FORWARDB = 5;	// Case of forwarding LMD from memory
 			}
-			else{	
+			else if(MEM_WB.Control!= STORE_TYPE){	
 				IF_ID.FORWARDB = 3;	// Case of forwarding Aluoutput from memory
 			}
 		}
 	}
 	else {
 		// If MEM_WB has a mult or div instruction running and we need to forward to move from high or low
-		if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x10))
-			IF_ID.FORWARDA = 4;	// Case of forwarding ALUOutput2 from memory
-		else if((ID_EX.instr_data.opcode == 0x00) && (ID_EX.instr_data.funct_code == 0x12))	
-			IF_ID.FORWARDA = 3;	// Case of forwarding ALUOutput from memory
+
+			// Move from HI
+			if(ID_EX.instr_data.funct_code == 0x10){
+				IF_ID.FORWARDA = 4; // Case of forwarding ALUOutput2 (HI) from memory
+			}
+			// Move to HI	
+			else if(ID_EX.instr_data.funct_code == 0x11){
+				IF_ID.FORWARDB = 3; // Case of forwarding ALUOutput (LO) from memory
+			}
+			// Move from LO
+			else if(ID_EX.instr_data.funct_code == 0x12){
+				IF_ID.FORWARDA = 3; // Case of forwarding ALUOutput (LO) from memory
+			}
+			// Move to LO
+			else if(ID_EX.instr_data.funct_code == 0x13){
+				IF_ID.FORWARDB = 4; // Case of forwarding ALUOutput2 (HI) from memory
+			}
+
 	}
+
+	bMultDivForward = ((EX_MEM.IR != 0) && (EX_MEM.instr_data.opcode == 0x00) 
+								&& (((EX_MEM.instr_data.funct_code >= 0x18) && (EX_MEM.instr_data.funct_code <= 0x1B))
+								|| (EX_MEM.instr_data.funct_code == 0x11) || (EX_MEM.instr_data.funct_code == 0x13)));
+
+	// Check for hazard with execute stage
+	if(!bMultDivForward) {
+		if( EX_MEM.instr_data.type == R_TYPE )
+		{
+		    dest = GET_RD( EX_MEM.IR );
+		}
+		else if( EX_MEM.instr_data.type == I_TYPE )
+		{
+		    dest = GET_RT( EX_MEM.IR );
+		}
+		else if( EX_MEM.instr_data.opcode == 0x03)
+			dest = 31;
+		else
+		    dest = 0;
+
+		// Check if destination register is same as first source		
+		if ( ( dest != 0 ) && ( dest == ( (bSysCallForward ? 2 : GET_RS( IF_ID.IR ) ) ) ) ){
+			if (EX_MEM.Control == LOAD_TYPE){
+				return 1;	// Stall
+			}
+			else if(EX_MEM.Control!= STORE_TYPE){	
+				IF_ID.FORWARDA = 1;		// Case of forwarding ALUOutput from execute
+			}
+		}
+
+		// Check if destination register is same as second source
+		if ( ( dest != 0 ) && ( dest == (bSysCallForward ? 4 : GET_RT( IF_ID.IR ) ) ) ){
+			if (EX_MEM.Control == LOAD_TYPE){
+				return 1;	// Stall
+			}
+			else if(EX_MEM.Control!= STORE_TYPE){	
+				IF_ID.FORWARDB = 1;	// Case of forwarding ALUOutput from execute	
+			}
+		}
+	}
+	else {
+		// If ex_mem has a mult or div instruction running and we need to forward to move from high or low
+			// Move from HI
+			if(ID_EX.instr_data.funct_code == 0x10){
+				IF_ID.FORWARDA = 2; // Case of forwarding ALUOutput2 (HI) from execute
+			}
+			// Move to HI	
+			else if(ID_EX.instr_data.funct_code == 0x11){
+				IF_ID.FORWARDB = 1; // Case of forwarding ALUOutput (LO) from execute
+			}
+			// Move from LO
+			else if(ID_EX.instr_data.funct_code == 0x12){
+				IF_ID.FORWARDA = 1; // Case of forwarding ALUOutput (LO) from execute
+			}
+			// Move to LO
+			else if(ID_EX.instr_data.funct_code == 0x13){
+				IF_ID.FORWARDB = 2; // Case of forwarding ALUOutput2 (HI) from execute
+			}
+	}
+    
+
+
     
     return 0;
 }
