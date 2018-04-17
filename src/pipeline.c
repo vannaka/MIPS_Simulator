@@ -225,6 +225,18 @@ uint8_t CheckInCache(uint32_t address){
 	return 1;
 }
 
+uint32_t GetCacheValue(uint32_t address){
+
+}
+
+uint32_t SetCacheValue(uint32_t address, uint32_t value){
+
+}
+
+void LoadCache(uint32_t address){
+
+}
+
 void HandleLoadCache(){
 
 		if(MEM_STALL <= 0){
@@ -233,15 +245,16 @@ void HandleLoadCache(){
 			if(bHitOrMiss){
 				MEM_STALL = 0;
 				WriteBuffer = GetCacheValue(EX_MEM.ALUOutput);
+				switch(MEM_WB.num_bytes){					
+					case BYTE: 		MEM_WB.LMD = 0x00FF & WriteBuffer;	break;
+					case HALF_WORD: MEM_WB.LMD = 0xFFFF & WriteBuffer;	break;
+					case WORD:		MEM_WB.LMD = WriteBuffer;			break;
+					default: 		/*	Do nothing	*/										break;
+				}
 			}
 			else{
+				LoadCache(EX_MEM.ALUOutput);
 				MEM_STALL = 100;
-			}
-			switch(MEM_WB.num_bytes){					
-				case BYTE: 		MEM_WB.LMD = 0x00FF & WriteBuffer;	break;
-				case HALF_WORD: MEM_WB.LMD = 0xFFFF & WriteBuffer;	break;
-				case WORD:		MEM_WB.LMD = WriteBuffer;			break;
-				default: 		/*	Do nothing	*/										break;
 			}
 		}
 		else
@@ -249,12 +262,31 @@ void HandleLoadCache(){
 }
 
 void HandleStoreCache(){
-		uint8_t bHitOrMiss = CheckInCache(EX_MEM.ALUOutput);
-		switch(EX_MEM.num_bytes){
-			case BYTE:		mem_write_32(EX_MEM.ALUOutput, 0x00FF & EX_MEM.B); 		break;
-			case HALF_WORD: mem_write_32(EX_MEM.ALUOutput, 0xFFFF & EX_MEM.B); 		break;			
-			case WORD: 		mem_write_32(EX_MEM.ALUOutput, EX_MEM.B); 				break;
-			default: 		/*	Do nothing	*/										break;				
+		if(MEM_STALL <= 0){
+			uint8_t bHitOrMiss = CheckInCache(EX_MEM.ALUOutput);
+			if(bHitOrMiss){
+				MEM_STALL = 0;
+				switch(EX_MEM.num_bytes){
+					case BYTE:	
+						SetCacheValue(EX_MEM.ALUOutput, 0x00FF & EX_MEM.B);	
+						mem_write_32(EX_MEM.ALUOutput, 0x00FF & EX_MEM.B); 		
+						break;
+					case HALF_WORD: 
+						SetCacheValue(EX_MEM.ALUOutput, 0xFFFF & EX_MEM.B);
+						mem_write_32(EX_MEM.ALUOutput, 0xFFFF & EX_MEM.B); 													
+						break;			
+					case WORD: 		
+						SetCacheValue(EX_MEM.ALUOutput, EX_MEM.B);						
+						mem_write_32(EX_MEM.ALUOutput, EX_MEM.B); 				
+						break;
+					default: 		/*	Do nothing	*/										
+						break;				
+				}
+			}
+			else{
+				LoadCache(EX_MEM.ALUOutput);
+				MEM_STALL = 100;
+			}
 		}
 }
 
