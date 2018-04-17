@@ -165,8 +165,8 @@ void MEM()
 		}
 	}
 	
-	
-	EX_MEM.IR = 0;
+	if(MEM_STALL == 0)
+		EX_MEM.IR = 0;
 }
 
 void WB()
