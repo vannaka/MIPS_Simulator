@@ -223,7 +223,13 @@ void WB()
 
 uint8_t CheckInCache(uint32_t address){
     uint8_t index = GETINDEX(address);
-	return 1;
+    uint32_t tag = GETTAG(address);
+    
+    //check if block is in cache at correct index and currently valid
+    if( L1Cache.blocks[index].tag == tag && L1Cache.blocks[index].valid == 1)
+        return 1;
+    else
+        return 0;
 }
 
 uint32_t GetCacheValue(uint32_t address){
