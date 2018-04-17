@@ -23,7 +23,9 @@ uint32_t PROGRAM_SIZE; /*in words*/
 
 char prog_file[64];
 
-uint8_t STALL;
+uint8_t DATA_STALL;
+uint8_t CONTROL_STALL;
+uint8_t JUMPED;
 uint8_t ENABLE_FORWARDING;
 
 /***************************************************************/

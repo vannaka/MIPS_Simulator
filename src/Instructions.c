@@ -9,7 +9,11 @@
 uint8_t isBranch(uint8_t op, uint8_t func){
 		return ( ( op == 0x01 ) || 
 								( op <= 0x07 && op >= 0x02) || 
-								( ( op == 0x00 ) && ( func == 0x08 || func == 0x09 ) ) );
+								( ( op == 0x00 ) && ( func == 0x08 || func == 0x09 ) ) ) ? 1 : 0;
+}
+
+void setJump() {
+	JUMPED = 1;
 }
 
 mips_instr_t opcode_0x00_table[0x2A + 1] =
@@ -190,6 +194,7 @@ void instr_handler_JR(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 
 	(*EX_MEM).Control = BRANCH_TYPE;
 	(*EX_MEM).flush = 1;
+	setJump();
 }
 
 
@@ -204,9 +209,10 @@ void instr_handler_JALR(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 
 	// jmp to new addr
 	NEXT_STATE.PC = rs_val;
-	(*EX_MEM).ALUOutput = CURRENT_STATE.PC + 4;
+	(*EX_MEM).ALUOutput = (*ID_EX).PC + 4;
 	(*EX_MEM).Control = BRANCH_TYPE;
 	(*EX_MEM).flush = 1;
+	setJump();
 }
 
 
@@ -390,11 +396,12 @@ void instr_handler_SLT(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_BLTZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	// Check RS < 0
-	if( (*ID_EX).A < 0x0 )
+	if( (int32_t)((*ID_EX).A) < 0x0 )
 	{
 		// Add immediate to PC
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		NEXT_STATE.PC = ( (*ID_EX).PC + 4*((int16_t)(*ID_EX).IMMED));
 		(*EX_MEM).flush = 1;
+		setJump();
 	}
 	else
 	{
@@ -409,11 +416,12 @@ void instr_handler_BLTZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_BGEZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 // Check RS >= 0
-	if( (*ID_EX).A >= 0x0 )
+	if( (int32_t)((*ID_EX).A) >= 0x0 )
 	{
 		// Add immediate to PC
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		NEXT_STATE.PC = ( (*ID_EX).PC + 4*((int16_t)(*ID_EX).IMMED));
 		(*EX_MEM).flush = 1;
+		setJump();
 	}
 	else
 	{
@@ -421,7 +429,7 @@ void instr_handler_BGEZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 		(*EX_MEM).flush = 0;
 	}
 
-	(*EX_MEM).ALUOutput = CURRENT_STATE.PC + 4;
+	(*EX_MEM).ALUOutput = (*ID_EX).PC + 4;
 	(*EX_MEM).Control = BRANCH_TYPE;
 }
 
@@ -430,7 +438,7 @@ void instr_handler_J(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	uint32_t instr = mem_read_32( (*ID_EX).PC );
 	uint32_t target = GET_ADDRESS( instr );
-	NEXT_STATE.PC = ( CURRENT_STATE.PC & 0xF0000000 ) | ( target << 2 );
+	NEXT_STATE.PC = ( (*ID_EX).PC & 0xF0000000 ) | ( target << 2 );
 	(*EX_MEM).flush = 1;
 }
 
@@ -440,11 +448,12 @@ void instr_handler_JAL(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	uint32_t instr = mem_read_32( (*ID_EX).PC );
 	uint32_t target = GET_ADDRESS( instr );
 	//NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
-	NEXT_STATE.PC = ( CURRENT_STATE.PC & 0xF0000000 ) | ( target << 2 );
+	NEXT_STATE.PC = ( (*ID_EX).PC & 0xF0000000 ) | ( target << 2 );
 
-	(*EX_MEM).ALUOutput = CURRENT_STATE.PC + 4;
+	(*EX_MEM).ALUOutput = (*ID_EX).PC + 4;
 	(*EX_MEM).Control = BRANCH_TYPE;
 	(*EX_MEM).flush = 1;
+	setJump();
 }
 
 
@@ -454,8 +463,9 @@ void instr_handler_BEQ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	//if equal, branch
 	if( (*ID_EX).A == (*ID_EX).B )
 	{
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		NEXT_STATE.PC = ( (*ID_EX).PC + 4*((int16_t)(*ID_EX).IMMED));
 		(*EX_MEM).flush = 1;
+		setJump();
 	}
 	else
 	{
@@ -472,8 +482,9 @@ void instr_handler_BNE(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 	//if not equal, branch
 	if( (*ID_EX).A != (*ID_EX).B )
 	{
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		NEXT_STATE.PC = ( (*ID_EX).PC + 4*((int16_t)(*ID_EX).IMMED));
 		(*EX_MEM).flush = 1;
+		setJump();
 	}
 	else
 	{
@@ -488,10 +499,11 @@ void instr_handler_BNE(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_BLEZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	//if less than equal to zero, branch
-	if( (*ID_EX).A <= 0x0 )
+	if( (int32_t)((*ID_EX).A) <= 0x0 )
 	{
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		NEXT_STATE.PC = ( (*ID_EX).PC + 4*((int16_t)(*ID_EX).IMMED));
 		(*EX_MEM).flush = 1;
+		setJump();
 	}
 	else
 	{
@@ -506,10 +518,11 @@ void instr_handler_BLEZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_BGTZ(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	//if greater than equal to zero, branch
-	if( (*ID_EX).A >= 0x0 )
+	if( (int32_t)((*ID_EX).A) >= 0x0 )
 	{
-		NEXT_STATE.PC = ( CURRENT_STATE.PC + (*ID_EX).IMMED);
+		NEXT_STATE.PC = ( (*ID_EX).PC + 4*((int16_t)(*ID_EX).IMMED));
 		(*EX_MEM).flush = 1;
+		setJump();
 	}
 	else
 	{

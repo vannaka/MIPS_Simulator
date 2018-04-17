@@ -13,17 +13,19 @@ void handle_pipeline()
     ID();
     IF();
     
-    STALL = 0;
+    DATA_STALL = 0;
+	CONTROL_STALL = 0;
+	JUMPED = 0;
 }
 
 void IF()
 {   
-    if( !STALL )
+    if( !DATA_STALL && !CONTROL_STALL)
     {
         // Write new values in struct 
         IF_ID.IR = mem_read_32( CURRENT_STATE.PC );
         IF_ID.PC = CURRENT_STATE.PC;
-        NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
     }
 }
 
@@ -41,17 +43,14 @@ void ID()
 		// Write new values in struct
         ID_EX.instr_data = mips_instr_decode( IF_ID.IR );
       	ID_EX.IR = 0; 
- 
-        // Check for control hazards
-        STALL = checkControlHazard();
-        
-        //Check for data hazards
-		if(!ENABLE_FORWARDING && !STALL)
-        	STALL = checkDataHazard();
-		else if( !STALL )
-			STALL = checkForward();
 
-        if( !STALL )
+        //Check for data hazards
+		if(!ENABLE_FORWARDING)
+        	DATA_STALL = checkDataHazard();
+		else
+			DATA_STALL = checkForward();
+
+        if( !DATA_STALL )
         {
             // Pass on values
             ID_EX.PC = IF_ID.PC;
@@ -79,12 +78,17 @@ void ID()
 			}
             ID_EX.IMMED = (int32_t)immed;
 
-			printf("\nContents A: %08x, Forward Case: %d,",ID_EX.A, IF_ID.FORWARDA);
-			printf("\tContents B: %08x, Forward Case: %d,\n",ID_EX.B, IF_ID.FORWARDB);
+			//printf("\nContents A: %08x, Forward Case: %d,",ID_EX.A, IF_ID.FORWARDA);
+			//printf("\tContents B: %08x, Forward Case: %d,\n",ID_EX.B, IF_ID.FORWARDB);
+
+ 			// Check for control hazards
+        	CONTROL_STALL = checkControlHazard();
         }
-        else
-            printf("\nSTALLED");
+		 
+       
 	}
+	else
+		printf("---------flush---------\n");
 
 	IF_ID.FORWARDA = 0;
 	IF_ID.FORWARDB = 0;
@@ -109,6 +113,7 @@ void EX()
             memset( &IF_ID, 0, sizeof(CPU_Pipeline_Reg) );
             memset( &ID_EX, 0, sizeof(CPU_Pipeline_Reg) );
             EX_MEM.flush = 0;
+			CURRENT_STATE = NEXT_STATE;
         }
 	}
 	
@@ -249,13 +254,11 @@ uint8_t checkDataHazard()
 
 uint8_t checkControlHazard()
 {
-	if(EX_MEM.IR == 0)
-		return 0;
-    uint8_t fcode = EX_MEM.instr_data.funct_code;
-    uint8_t opcode = EX_MEM.instr_data.opcode;
+  	uint8_t fcode = IF_ID.instr_data.funct_code;
+    uint8_t opcode = IF_ID.instr_data.opcode;
     
    
-    if( isBranch( opcode, fcode ) )
+    if( isBranch( opcode, fcode ) > 0 )
         return 1;
     
     return 0;
