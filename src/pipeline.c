@@ -3,6 +3,7 @@
 #include "pipeline.h"
 #include "memory.h"
 #include "Instructions.h"
+#include "mu-cache.h"
 #include <string.h>
 
 void handle_pipeline()
