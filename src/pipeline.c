@@ -165,8 +165,8 @@ void MEM()
 		}
 	}
 	
-	if(MEM_STALL == 0)
-		EX_MEM.IR = 0;
+	
+	EX_MEM.IR = 0;
 }
 
 void WB()
@@ -222,6 +222,7 @@ void WB()
 }
 
 uint8_t CheckInCache(uint32_t address){
+    uint8_t index = GETINDEX(address);
 	return 1;
 }
 
