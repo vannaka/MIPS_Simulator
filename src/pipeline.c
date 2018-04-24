@@ -306,8 +306,14 @@ void HandleStoreCache(){
 				MEM_STALL = 100;
 			}
 		}
-		else 
+		else {
+			if(MEM_STALL == 1){
+				SetCacheValue(EX_MEM.ALUOutput, EX_MEM.B);						
+				mem_write_32(EX_MEM.ALUOutput, EX_MEM.B); 
+			}
+				
 			MEM_STALL--;
+		}
 }
 
 uint8_t isSysCallForward()

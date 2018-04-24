@@ -18,6 +18,7 @@ void help()
 	printf("------------------------------------------------------------------\n\n");
 	printf("\t**********MU-MIPS Help MENU**********\n\n");
 	printf("sim\t-- simulate program to completion \n");
+	printf("cache\t-- show cache blocks");
 	printf("run <n>\t-- simulate program for <n> instructions\n");
 	printf("rdump\t-- dump register values\n");
 	printf("reset\t-- clears all registers/memory and re-loads the program\n");
@@ -106,7 +107,8 @@ void handle_command()
 	uint32_t register_no;
 	int register_value;
 	int hi_reg_value, lo_reg_value;
-
+	int i;
+	int j;
 	printf( "\nMU-MIPS SIM:> " );
 
 	if( scanf( "%s", buffer ) == EOF )
@@ -128,6 +130,16 @@ void handle_command()
 				break;
 			}
 			mdump( start, stop );
+			break;
+		case 'C':
+		case 'c':
+			for(i = 0; i < NUM_CACHE_BLOCKS; i++) {
+				printf("\nBlock %d: ", i);
+				for(j = 0; j < WORD_PER_BLOCK; j++) {
+					printf("\t Word %d: %08x",j, L1Cache.blocks[i].words[j]);
+				}
+			}
+			printf("\n");
 			break;
 
 		case '?':

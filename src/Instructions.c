@@ -603,7 +603,7 @@ void instr_handler_LUI(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_LB(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	// Set address to Register Contents A + immediate
-	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
+	(*EX_MEM).ALUOutput = (*ID_EX).A + (int16_t)(*ID_EX).IMMED;
 	(*EX_MEM).Control = LOAD_TYPE;
 	(*EX_MEM).num_bytes = BYTE;
 }
@@ -613,7 +613,7 @@ void instr_handler_LB(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_LH(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	// Set address to Register Contents A + immediate
-	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
+	(*EX_MEM).ALUOutput = (*ID_EX).A + (int16_t)(*ID_EX).IMMED;
 	(*EX_MEM).Control = LOAD_TYPE;
 	(*EX_MEM).num_bytes = HALF_WORD;
 }
@@ -623,7 +623,7 @@ void instr_handler_LH(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_LW(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	// Set address to Register Contents A + immediate
-	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
+	(*EX_MEM).ALUOutput = (*ID_EX).A + (int16_t)(*ID_EX).IMMED;
 	(*EX_MEM).Control = LOAD_TYPE;
 	(*EX_MEM).num_bytes = WORD;
 }
@@ -633,7 +633,7 @@ void instr_handler_LW(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_SB(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	// Set address to Register Contents A + immediate
-	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
+	(*EX_MEM).ALUOutput = (*ID_EX).A + (int16_t)(*ID_EX).IMMED;
 	(*EX_MEM).Control = STORE_TYPE;
 	(*EX_MEM).num_bytes = BYTE;
 }
@@ -643,7 +643,7 @@ void instr_handler_SB(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_SH(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	// Set address to Register Contents A + immediate
-	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
+	(*EX_MEM).ALUOutput = (*ID_EX).A + (int16_t)(*ID_EX).IMMED;
 	(*EX_MEM).Control = STORE_TYPE;
 	(*EX_MEM).num_bytes = HALF_WORD;
 }
@@ -653,7 +653,7 @@ void instr_handler_SH(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 void instr_handler_SW(CPU_Pipeline_Reg* ID_EX, CPU_Pipeline_Reg* EX_MEM)
 {
 	// Set address to Register Contents A + immediate
-	(*EX_MEM).ALUOutput = (*ID_EX).A + (*ID_EX).IMMED;
+	(*EX_MEM).ALUOutput = (*ID_EX).A + (int16_t)(*ID_EX).IMMED;
 	(*EX_MEM).Control = STORE_TYPE;
 	(*EX_MEM).num_bytes = WORD;
 }
