@@ -27,8 +27,7 @@ void IF()
 		    // Write new values in struct 
 		    IF_ID.IR = mem_read_32( CURRENT_STATE.PC );
 		    IF_ID.PC = CURRENT_STATE.PC;
-			if(!JUMPED)
-				NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+			NEXT_STATE.PC = CURRENT_STATE.PC + 4;
 		}
 	}
 }
