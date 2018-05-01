@@ -27,7 +27,8 @@ uint8_t DATA_STALL;
 uint8_t CONTROL_STALL;
 uint8_t MEM_STALL;
 uint8_t JUMPED;
-uint8_t ENABLE_FORWARDING;
+int ENABLE_FORWARDING;
+int ENABLE_CACHE;
 
 /***************************************************************/
 /* Function Declerations.                                      */

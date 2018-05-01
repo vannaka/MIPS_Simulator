@@ -96,8 +96,6 @@ void ID()
 			 
 		   
 		}
-		else
-			printf("---------flush---------\n");
 
 		IF_ID.FORWARDA = 0;
 		IF_ID.FORWARDB = 0;
@@ -173,43 +171,29 @@ void WB()
 	if( MEM_WB.IR != 0 ) {
 		// Write new values dependent upon control type
 		switch(MEM_WB.Control){
-			case LOAD_TYPE:			NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.LMD;			
-					//printf("\nReg: %s with %08x",mips_reg_names[GET_RT( MEM_WB.IR )], MEM_WB.LMD); 								
-					//printf("\tA: %08x B: %08x IR:%08x",MEM_WB.A, MEM_WB.B, MEM_WB.IR);
-					break;
+			case LOAD_TYPE:			NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.LMD;			break;
 			case STORE_TYPE: 		/*	Do nothing	*/								 			break;
 			case REGISTER_TYPE: 
 				switch(MEM_WB.instr_data.type){
-					case R_TYPE: 	NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 	
-						//printf("\nReg: %s with %08x",mips_reg_names[GET_RD( MEM_WB.IR )], MEM_WB.ALUOutput);
-						break;
-					case I_TYPE: 	NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.ALUOutput; 	
-						//printf("\nReg: %s with %08x",mips_reg_names[GET_RT( MEM_WB.IR )], MEM_WB.ALUOutput);
-						break;
+					case R_TYPE: 	NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 	break;
+					case I_TYPE: 	NEXT_STATE.REGS[GET_RT( MEM_WB.IR )] = MEM_WB.ALUOutput; 	break;
 					default:		/*	Do nothing	*/					 						break;
 				}
-				//printf("\tA: %08x B: %08x IR:%08x",MEM_WB.A, MEM_WB.B, MEM_WB.IR);
 				break;
 			case SPECIAL_REGISTER_TYPE:
 				NEXT_STATE.LO = MEM_WB.ALUOutput;
 				NEXT_STATE.HI = MEM_WB.ALUOutput2;
-				//printf("\nReg: %s with %08x","LO", MEM_WB.ALUOutput);
-				//printf("\nReg: %s with %08x","HI", MEM_WB.ALUOutput2);
-				//printf("\tA: %08x B: %08x IR:%08x",MEM_WB.A, MEM_WB.B, MEM_WB.IR);
 				break;
 			case BRANCH_TYPE:
 				// JALR			
 				if(MEM_WB.instr_data.opcode == 0x00 && MEM_WB.instr_data.funct_code == 0x09){
-					NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 
-					//printf("\nReg: %s with %08x",mips_reg_names[GET_RD( MEM_WB.IR )], MEM_WB.ALUOutput);	
-					//printf("\tA: %08x B: %08x IR:%08x",MEM_WB.A, MEM_WB.B, MEM_WB.IR);			
+					NEXT_STATE.REGS[GET_RD( MEM_WB.IR )] = MEM_WB.ALUOutput; 		
 				}
 				// JAL
 				else if(MEM_WB.instr_data.opcode == 0x03){
 					NEXT_STATE.REGS[31] = MEM_WB.ALUOutput;
-					//printf("\nReg: %s with %08x",mips_reg_names[31], MEM_WB.ALUOutput);
-					//printf("\tA: %08x B: %08x IR:%08x",MEM_WB.A, MEM_WB.B, MEM_WB.IR);
 				}
+				break;
 			default:				/*	Do nothing	*/	break;
 		}
 	}
@@ -225,10 +209,16 @@ uint8_t CheckInCache(uint32_t address){
     uint32_t tag = GETTAG(address);
     
     //check if block is in cache at correct index and currently valid
-    if( L1Cache.blocks[index].tag == tag && L1Cache.blocks[index].valid == 1)
+    if( L1Cache.blocks[index].tag == tag && L1Cache.blocks[index].valid == 1){
+		printf("\nCache hit at %08x",address);
+		cache_hits++;
         return 1;
-    else
+	}
+    else{
+		printf("\nCache miss at %08x",address);
+		cache_misses++;
         return 0;
+	}
 }
 
 uint32_t GetCacheValue(uint32_t address){
@@ -256,6 +246,7 @@ void LoadCache(uint32_t address){
 
 void HandleLoadCache(){
 
+	if(ENABLE_CACHE == 1) {
 		if(MEM_STALL <= 0){
 			uint8_t bHitOrMiss = CheckInCache(EX_MEM.ALUOutput);
 			uint32_t WriteBuffer;
@@ -276,9 +267,27 @@ void HandleLoadCache(){
 		}
 		else
 			MEM_STALL--;
+	}
+	else{
+		if(MEM_STALL == 1){
+			uint32_t WriteBuffer = mem_read_32( EX_MEM.ALUOutput );
+			switch(MEM_WB.num_bytes){					
+				case BYTE: 		MEM_WB.LMD = 0x00FF & WriteBuffer;	break;
+				case HALF_WORD: MEM_WB.LMD = 0xFFFF & WriteBuffer;	break;
+				case WORD:		MEM_WB.LMD = WriteBuffer;			break;
+				default: 		/*	Do nothing	*/										break;
+			}
+			MEM_STALL = 0;
+		}
+		else if(MEM_STALL == 0)
+			MEM_STALL = 100;
+		else
+			MEM_STALL--;
+	}
 }
 
 void HandleStoreCache(){
+	if(ENABLE_CACHE == 1) {
 		if(MEM_STALL <= 0){
 			uint8_t bHitOrMiss = CheckInCache(EX_MEM.ALUOutput);
 			if(bHitOrMiss){
@@ -313,6 +322,22 @@ void HandleStoreCache(){
 				
 			MEM_STALL--;
 		}
+	}
+	else{
+		if(MEM_STALL == 1){
+			switch(MEM_WB.num_bytes){					
+				case BYTE: 		mem_write_32(EX_MEM.ALUOutput, 0x00FF & EX_MEM.B); 	break;
+				case HALF_WORD: mem_write_32(EX_MEM.ALUOutput, 0xFFFF & EX_MEM.B);	break;
+				case WORD:		mem_write_32(EX_MEM.ALUOutput, EX_MEM.B);			break;
+				default: 		/*	Do nothing	*/									break;
+			}
+			MEM_STALL = 0;
+		}
+		else if(MEM_STALL == 0)
+			MEM_STALL = 100;
+		else
+			MEM_STALL--;
+	}
 }
 
 uint8_t isSysCallForward()

@@ -18,7 +18,8 @@ void help()
 	printf("------------------------------------------------------------------\n\n");
 	printf("\t**********MU-MIPS Help MENU**********\n\n");
 	printf("sim\t-- simulate program to completion \n");
-	printf("cache\t-- show cache blocks");
+	printf("turn cache\t-- enable/disable cache blocks\n");
+	printf("cache\t-- show cache blocks\n");
 	printf("run <n>\t-- simulate program for <n> instructions\n");
 	printf("rdump\t-- dump register values\n");
 	printf("reset\t-- clears all registers/memory and re-loads the program\n");
@@ -139,9 +140,9 @@ void handle_command()
 					printf("\t Word %d: %08x",j, L1Cache.blocks[i].words[j]);
 				}
 			}
-			printf("\n");
+			printf("\n\nNumber of cache hits: %d", cache_hits);
+			printf("\nNumber of cache misses: %d\n", cache_misses);
 			break;
-
 		case '?':
 			help();
 			break;
@@ -221,6 +222,13 @@ void handle_command()
 			}
 				ENABLE_FORWARDING == 0 ? printf("Forwarding OFF\n") : printf("Forwarding ON\n");
 			break;
+		case 'T':
+		case 't':
+			if (scanf("%d", (int*)&ENABLE_CACHE) != 1) {
+				break;
+			}
+				ENABLE_CACHE == 0 ? printf("Cache OFF\n") : printf("Cache ON\n");
+			break;
 		default:
 			printf( "Invalid Command.\n" );
 			break;
@@ -264,6 +272,7 @@ void reset()
 	RUN_FLAG = true;
     cache_misses = 0;
     cache_hits = 0;
+	ENABLE_CACHE = 1;
 }
 
 
@@ -329,6 +338,7 @@ void initialize()
 	RUN_FLAG = true;
     cache_misses = 0;
     cache_hits = 0;
+	ENABLE_CACHE = 1;
 }
 
 
